@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — الإشعارات والطلبات الأكاديمية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Universal SDK API & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --bg2: #0e0e0b;
+      --bg3: #131310;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #7a6230;
+      --gold-faint: rgba(201,168,76,0.08);
+      --cream: #f5f0e8;
+      --cream-dim: #9a9488;
+      --border: rgba(201,168,76,0.12);
+      --red: #e05c7a;
+      --blue: #5c9ae0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Amiri', 'Times New Roman', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.25;
+    }
+
+    /* TOP NAV */
+    .topnav {
+      background: rgba(10,10,8,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); display: flex;
+      align-items: center; justify-content: space-between;
+      padding: 0 20px; height: 60px; position: sticky; top: 0; z-index: 100;
+    }
+    .topnav-title { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.6rem; color: var(--cream); font-weight: bold; }
+    .topnav-btn { background: none; border: none; color: var(--cream-dim); font-size: 1.3rem; cursor: pointer; padding: 6px; transition: color 0.2s; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .topnav-btn:hover { color: var(--gold); }
+
+    /* PAGE WRAP */
+    .page { max-width: 680px; margin: 0 auto; padding-bottom: 90px; }
+
+    /* FILTER TABS */
+    .filter-tabs {
+      display: flex; gap: 8px; padding: 14px 20px; overflow-x: auto;
+      border-bottom: 1px solid var(--border); position: sticky;
+      top: 60px; background: rgba(10,10,8,0.95); backdrop-filter: blur(12px); z-index: 50;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab {
+      display: flex; align-items: center; gap: 8px; padding: 8px 18px;
+      font-family: 'Space Mono', monospace; font-size: 0.62rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream-dim);
+      border: 1px solid var(--border); background: var(--bg2);
+      cursor: pointer; transition: all 0.2s; white-space: nowrap; border-radius: 20px; font-weight: bold; user-select: none;
+    }
+    .filter-tab.active { background: var(--gold-faint); border-color: var(--gold); color: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.15); }
+    .filter-tab:hover { border-color: var(--gold-dim); color: var(--cream); }
+    .tab-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* SECTION HEADER */
+    .section-head {
+      padding: 22px 20px 8px; font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; color: var(--gold-dim); letter-spacing: 0.2em; text-transform: uppercase; font-weight: bold;
+    }
+
+    /* NOTIF ITEM */
+    .notif-item {
+      display: flex; align-items: center; gap: 16px; padding: 16px 20px;
+      border-bottom: 1px solid var(--border); transition: all 0.2s; cursor: pointer; position: relative; animation: slideIn 0.3s ease both; background: var(--bg);
+    }
+    .notif-item:hover { background: var(--bg2); }
+    .notif-item.unread::before {
+      content: ''; position: absolute; right: 0; top: 12px; bottom: 12px;
+      width: 4px; background: var(--gold); border-radius: 2px; box-shadow: 0 0 8px var(--gold);
+    }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+    .notif-avatar { position: relative; flex-shrink: 0; }
+    .notif-pic { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.3rem; color: var(--cream); border: 1px solid var(--border); font-weight: bold; text-decoration: none; }
+    .notif-type-badge { position: absolute; bottom: -2px; left: -2px; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; border: 2px solid var(--bg); color: white; }
+    .badge-like { background: var(--red); }
+    .badge-follow { background: var(--gold); color: var(--bg); font-weight: bold; }
+    .badge-comment { background: var(--blue); }
+    .badge-mention { background: #5ce0b0; color: var(--bg); font-weight: bold; }
+    .badge-request { background: #a05ce0; }
+    .badge-channel { background: var(--gold-dim); }
+
+    .notif-body { flex: 1; min-width: 0; text-align: right; }
+    .notif-text { font-family: 'Amiri', serif; font-size: 1.05rem; color: var(--cream); line-height: 1.6; }
+    .notif-text strong { color: var(--gold-light); font-weight: 700; }
+    .notif-text .notif-gold { color: var(--gold); font-style: italic; }
+    .notif-time { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); margin-top: 4px; letter-spacing: 0.03em; }
+
+    .notif-thumb { width: 46px; height: 46px; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; border-radius: 6px; }
+
+    /* FOLLOW BUTTON in notif */
+    .notif-follow-btn { padding: 8px 16px; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em; border: 1px solid var(--gold); background: none; color: var(--gold); cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; border-radius: 4px; font-weight: bold; }
+    .notif-follow-btn:hover, .notif-follow-btn.following { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+
+    /* REQUEST BUTTONS */
+    .notif-req-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .req-accept { padding: 8px 16px; background: var(--gold); color: var(--bg); border: none; font-family: 'Space Mono', monospace; font-size: 0.6rem; cursor: pointer; transition: all 0.2s; border-radius: 4px; font-weight: bold; }
+    .req-accept:hover { background: var(--gold-light); box-shadow: 0 0 12px rgba(201,168,76,0.4); }
+    .req-decline { padding: 8px 16px; background: none; color: var(--cream-dim); border: 1px solid var(--border); font-family: 'Space Mono', monospace; font-size: 0.6rem; cursor: pointer; transition: all 0.2s; border-radius: 4px; font-weight: bold; }
+    .req-decline:hover { border-color: var(--red); color: var(--red); }
+
+    /* QUICK REPLY BANNER */
+    .quick-reply-banner {
+      position: fixed; top: 0; left: 0; right: 0; background: var(--bg2); border-bottom: 1px solid var(--gold);
+      padding: 16px 24px; z-index: 500; transform: translateY(-100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+    .quick-reply-banner.show { transform: translateY(0); }
+    .qr-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.2rem; color: var(--cream); flex-shrink: 0; font-weight: bold; border: 1px solid var(--border); }
+    .qr-body { flex: 1; text-align: right; }
+    .qr-name { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--gold); letter-spacing: 0.05em; margin-bottom: 2px; font-weight: bold; }
+    .qr-preview { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--cream-dim); }
+    .qr-input-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+    .qr-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--cream); padding: 10px 16px; font-family: 'Amiri', serif; font-size: 1rem; outline: none; border-radius: 20px; text-align: right; transition: border-color 0.2s; }
+    .qr-input:focus { border-color: var(--gold); background: var(--gold-faint); }
+    .qr-send { background: var(--gold); border: none; color: var(--bg); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+    .qr-send:hover { background: var(--gold-light); transform: scale(1.05); }
+    .qr-send:active { transform: scale(0.95); }
+    .qr-close { background: none; border: none; color: var(--cream-dim); font-size: 1.3rem; cursor: pointer; padding: 4px; flex-shrink: 0; transition: color 0.2s; }
+    .qr-close:hover { color: var(--red); }
+
+    /* SETTINGS MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 300; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .settings-modal { background: var(--bg2); border: 1px solid var(--border); border-bottom: none; width: 100%; max-width: 680px; border-radius: 16px 16px 0 0; padding: 20px 32px 48px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); box-shadow: 0 -10px 50px rgba(0,0,0,0.8); }
+    .modal-overlay.show .settings-modal { transform: translateY(0); }
+    .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 24px; }
+    .modal-title { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 24px; font-weight: bold; text-align: right; }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border); text-align: right; }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--cream); font-weight: bold; }
+    .setting-sub { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); margin-top: 3px; letter-spacing: 0.03em; }
+    .toggle { position: relative; width: 46px; height: 26px; cursor: pointer; flex-shrink: 0; margin-left: 12px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track { position: absolute; inset: 0; background: var(--bg3); border: 1px solid var(--border); border-radius: 13px; transition: all 0.25s; }
+    .toggle input:checked + .toggle-track { background: var(--gold-faint); border-color: var(--gold); }
+    .toggle-thumb { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--cream-dim); transition: all 0.25s; }
+    .toggle input:checked ~ .toggle-thumb { background: var(--gold); right: calc(100% - 21px); box-shadow: 0 0 8px var(--gold); }
+
+    /* BOTTOM NAV */
+    .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: rgba(10,10,8,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); z-index: 150; align-items: center; justify-content: space-around; padding: 0 8px; }
+    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; color: var(--cream-dim); cursor: pointer; transition: color 0.2s; text-decoration: none; position: relative; }
+    .bottom-nav-item.active { color: var(--gold); font-weight: bold; }
+    .bottom-nav-icon { font-size: 1.3rem; }
+    .bottom-nav-label { font-family: 'Space Mono', monospace; font-size: 0.45rem; letter-spacing: 0.05em; }
+    .bottom-nav-badge { position: absolute; top: 4px; right: 6px; min-width: 16px; height: 16px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 0.42rem; color: white; padding: 0 3px; }
+    .bottom-nav-add { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 12px; cursor: pointer; background: none; border: none; }
+    .bottom-nav-add-icon { width: 36px; height: 36px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--bg); font-weight: bold; line-height: 1; transition: all 0.2s; }
+    .bottom-nav-add:hover .bottom-nav-add-icon { background: var(--gold-light); transform: scale(1.05); }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 80px 20px; display: none; animation: fadeIn 0.3s ease; }
+    .empty-state.show { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .empty-icon { font-size: 3.5rem; margin-bottom: 16px; opacity: 0.2; }
+    .empty-text { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--cream-dim); letter-spacing: 0.1em; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg2); border: 1px solid var(--gold); color: var(--gold);
+      font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 12px 24px;
+      letter-spacing: 0.1em; z-index: 1000; opacity: 0; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      pointer-events: none; border-radius: 6px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); font-weight: bold; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- Quick Reply Banner -->
+<div class="quick-reply-banner" id="qrBanner">
+  <div class="qr-avatar" id="qrAvatar" style="background: linear-gradient(135deg,#7a6230,#2d6e4e)">أ</div>
+  <div class="qr-body">
+    <div class="qr-name" id="qrName">أمينة بن عمر</div>
+    <div class="qr-preview" id="qrPreview">أعجبه منشورك</div>
+    <div class="qr-input-row">
+      <button class="qr-send" onclick="sendQuickReply()" title="إرسال الرد المباشر">↑</button>
+      <input class="qr-input" id="qrInput" placeholder="رد مباشر سريع..." onkeydown="if(event.key==='Enter') sendQuickReply()" />
+    </div>
+  </div>
+  <button class="qr-close" onclick="closeQR()" title="إغلاق">✕</button>
+</div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <button class="topnav-btn" onclick="openSettings()" title="إعدادات الإشعارات">⚙️</button>
+  <div class="topnav-title">الإشعارات والطلبات</div>
+  <a href="feed.html" class="topnav-btn" title="العودة للرئيسية">←</a>
+</nav>
+
+<div class="page">
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterNotifs('all', this)">الكل</button>
+    <button class="filter-tab" onclick="filterNotifs('request', this)"><div class="tab-dot" style="color:#a05ce0"></div>طلبات المتابعة</button>
+    <button class="filter-tab" onclick="filterNotifs('like', this)"><div class="tab-dot" style="color:var(--red)"></div>إعجابات</button>
+    <button class="filter-tab" onclick="filterNotifs('comment', this)"><div class="tab-dot" style="color:var(--blue)"></div>تعليقات</button>
+    <button class="filter-tab" onclick="filterNotifs('channel', this)"><div class="tab-dot" style="color:var(--gold-dim)"></div>قنوات رسمية</button>
+  </div>
+
+  <!-- NOTIFS LIST -->
+  <div id="notifsList">
+
+    <div class="section-head">طلبات المتابعة والمراسلة</div>
+
+    <!-- Follow Request -->
+    <div class="notif-item unread" data-type="request">
+      <a href="chat.html" class="notif-avatar" onclick="localStorage.setItem('targetChat', 'لينة خالد'); event.stopPropagation();">
+        <div class="notif-pic" style="background:linear-gradient(135deg,#2a1a3a,#4e2d6e)">ل</div>
+        <div class="notif-type-badge badge-request">?</div>
+      </a>
+      <div class="notif-body">
+        <div class="notif-text"><strong>لينة خالد</strong> (كلية الحقوق Univ. Alger) أرسلت طلب متابعة لحسابك الأكاديمي</div>
+        <div class="notif-time">منذ 23 دقيقة · حساب مغلق</div>
+      </div>
+      <div class="notif-req-btns">
+        <button class="req-accept" onclick="acceptFollowReq(this, 'لينة خالد', event)">قبول ✓</button>
+        <button class="req-decline" onclick="declineReq(this, event)">رفض ✕</button>
+      </div>
+    </div>
+
+    <div class="section-head">نشاط المنشورات والتفاعل</div>
+
+    <!-- Like -->
+    <div class="notif-item unread" data-type="like" onclick="showQR('أمينة بن عمر', 'أعجبها منشورك عن الخوارزميات', '3a1a1a', '6e4e2d', 'أ')">
+      <a href="chat.html" class="notif-avatar" onclick="localStorage.setItem('targetChat', 'أمينة بن عمر'); event.stopPropagation();">
+        <div class="notif-pic" style="background:linear-gradient(135deg,#3a1a1a,#6e4e2d)">أ</div>
+        <div class="notif-type-badge badge-like">♥</div>
+      </a>
+      <div class="notif-body">
+        <div class="notif-text"><strong>أمينة بن عمر</strong> أعجبها منشورك في الصفحة الرئيسية</div>
+        <div class="notif-time">منذ دقيقتين · انقر للرد السريع المباشر</div>
+      </div>
+      <div class="notif-thumb">📄</div>
+    </div>
+
+    <!-- Follow -->
+    <div class="notif-item unread" data-type="follow" onclick="showQR('رضا بوزيد', 'بدأ يتابعك', '1a2a3a', '2d4e6e', 'ر')">
+      <a href="chat.html" class="notif-avatar" onclick="localStorage.setItem('targetChat', 'رضا بوزيد'); event.stopPropagation();">
+        <div class="notif-pic" style="background:linear-gradient(135deg,#1a2a3a,#2d4e6e)">ر</div>
+        <div class="notif-type-badge badge-follow">+</div>
+      </a>
+      <div class="notif-body">
+        <div class="notif-text"><strong>رضا بوزيد</strong> بدأ يتابعك</div>
+        <div class="notif-time">منذ 8 دقائق</div>
+      </div>
+      <button class="notif-follow-btn" onclick="toggleFollow(this, event)">تابع</button>
+    </div>
+
+    <!-- Comment -->
+    <div class="notif-item unread" data-type="comment" onclick="showQR('يوسف مزيان', 'علّق على سؤالك', '2a1a3a', '4e2d6e', 'ي')">
+      <a href="chat.html" class="notif-avatar" onclick="localStorage.setItem('targetChat', 'يوسف مزيان'); event.stopPropagation();">
+        <div class="notif-pic" style="background:linear-gradient(135deg,#2a1a3a,#4e2d6e)">ي</div>
+        <div class="notif-type-badge badge-comment">💬</div>
+      </a>
+      <div class="notif-body">
+        <div class="notif-text"><strong>يوسف مزيان</strong> علّق على سؤالك: <span class="notif-gold">"شكراً جزيلاً على المساعدة 🙏"</span></div>
+        <div class="notif-time">منذ 15 دقيقة · انقر للرد السريع</div>
+      </div>
+      <div class="notif-thumb">📝</div>
+    </div>
+
+    <div class="section-head">إعلانات القنوات الرسمية</div>
+
+    <!-- Channel notif -->
+    <div class="notif-item" data-type="channel" onclick="window.location.href='feed.html'">
+      <div class="notif-avatar">
+        <div class="notif-pic" style="background:linear-gradient(135deg,#1a3a2a,#2d6e4e); border-radius:8px">📢</div>
+        <div class="notif-type-badge badge-channel">📣</div>
+      </div>
+      <div class="notif-body">
+        <div class="notif-text"><strong>قناة كلية الطب الرسمية</strong> نشرت تعميماً جديداً حول الامتحانات</div>
+        <div class="notif-time">منذ يومين · مثبت في الصفحة الرئيسية</div>
+      </div>
+      <div class="notif-thumb">📅</div>
+    </div>
+
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🔔</div>
+    <div class="empty-text">لا توجد إشعارات في هذه الفئة حالياً</div>
+  </div>
+
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsOverlay" onclick="handleSettingsOverlay(event)">
+  <div class="settings-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">إعدادات الإشعارات والأمان</div>
+
+    <div class="setting-row"><div><div class="setting-label">إشعارات الإعجابات</div><div class="setting-sub">عند إعجاب شخص بمنشوراتك</div></div><label class="toggle"><input type="checkbox" checked onchange="KulliyaDB.showToast('تم حفظ الإعداد ✓')"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="setting-row"><div><div class="setting-label">إشعارات المتابعة</div><div class="setting-sub">عند متابعة شخص لك</div></div><label class="toggle"><input type="checkbox" checked onchange="KulliyaDB.showToast('تم حفظ الإعداد ✓')"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="setting-row"><div><div class="setting-label">إشعارات التعليقات</div><div class="setting-sub">عند التعليق على منشوراتك</div></div><label class="toggle"><input type="checkbox" checked onchange="KulliyaDB.showToast('تم حفظ الإعداد ✓')"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="setting-row"><div><div class="setting-label">إشعارات الرسائل</div><div class="setting-sub">رسائل مباشرة وردود</div></div><label class="toggle"><input type="checkbox" checked onchange="KulliyaDB.showToast('تم حفظ الإعداد ✓')"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+    <div class="setting-row"><div><div class="setting-label">إشعارات القنوات</div><div class="setting-sub">منشورات القنوات التي انضممت إليها</div></div><label class="toggle"><input type="checkbox" checked onchange="KulliyaDB.showToast('تم حفظ الإعداد ✓')"/><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="feed.html" class="bottom-nav-item"><span class="bottom-nav-icon">🏠</span><span class="bottom-nav-label">الرئيسية</span></a>
+  <a href="inbox.html" class="bottom-nav-item active"><span class="bottom-nav-icon">🔔</span><span class="bottom-nav-label">الإشعارات</span><span class="bottom-nav-badge" id="botBadgeCount">3</span></a>
+  <button class="bottom-nav-add" onclick="window.location.href='feed.html'"><div class="bottom-nav-add-icon">+</div></button>
+  <a href="chat.html" class="bottom-nav-item"><span class="bottom-nav-icon">💬</span><span class="bottom-nav-label">المحادثات</span></a>
+  <a href="profile.html" class="bottom-nav-item"><span class="bottom-nav-icon">👤</span><span class="bottom-nav-label">البروفايل</span></a>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    // Exact pristine setup
+  });
+
+  function filterNotifs(type, btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active')); btn.classList.add('active');
+    const items = document.querySelectorAll('.notif-item'); let visible = 0;
+    items.forEach(i => {
+      if (type === 'all' || i.dataset.type === type) { i.style.display = 'flex'; visible++; }
+      else i.style.display = 'none';
+    });
+    document.querySelectorAll('.section-head').forEach(h => h.style.display = type === 'all' ? '' : 'none');
+    document.getElementById('emptyState').classList.toggle('show', visible === 0);
+  }
+
+  function toggleFollow(btn, e) {
+    e.stopPropagation();
+    if(btn.classList.contains('following')) { btn.classList.remove('following'); btn.textContent='تابع'; KulliyaDB.showToast('تم إلغاء المتابعة'); }
+    else { btn.classList.add('following'); btn.textContent='✓ تتابعه'; KulliyaDB.showToast('✓ تمت المتابعة بنجاح'); }
+  }
+
+  function acceptFollowReq(btn, name, e) {
+    e.stopPropagation();
+    const item = btn.closest('.notif-item');
+    item.querySelector('.notif-req-btns').innerHTML = '<span style="font-family:Space Mono; font-size:0.65rem; color:var(--gold); font-weight:bold;">✓ تمت الموافقة</span>';
+    item.classList.remove('unread');
+    
+    try {
+      let u = KulliyaDB.getCurrentUser();
+      u.followers_count = (u.followers_count || 0) + 1;
+      KulliyaDB.setCurrentUser(u);
+    } catch(err) {}
+
+    KulliyaDB.showToast(`✨ ✓ تمت إضافة ${name} إلى قائمة متابِعيك بنجاح`);
+  }
+
+  function declineReq(btn, e) {
+    e.stopPropagation();
+    const item = btn.closest('.notif-item');
+    item.style.opacity = '0'; item.style.transform = 'translateX(40px)';
+    setTimeout(() => item.remove(), 300); KulliyaDB.showToast('تم رفض الطلب ✓');
+  }
+
+  function showQR(name, preview, c1, c2, initial) {
+    document.getElementById('qrName').textContent = name;
+    document.getElementById('qrPreview').textContent = preview;
+    document.getElementById('qrAvatar').textContent = initial;
+    document.getElementById('qrAvatar').style.background = `linear-gradient(135deg,#${c1},#${c2})`;
+    document.getElementById('qrBanner').classList.add('show');
+    localStorage.setItem('targetChat', name);
+    setTimeout(() => document.getElementById('qrInput').focus(), 100);
+  }
+  function closeQR() { document.getElementById('qrBanner').classList.remove('show'); document.getElementById('qrInput').value = ''; }
+  
+  function sendQuickReply() {
+    const val = document.getElementById('qrInput').value.trim();
+    if (!val) { KulliyaDB.showToast('يرجى كتابة الرد أولاً!'); return; }
+    const target = document.getElementById('qrName').textContent; closeQR();
+
+    // Persist quick reply into KulliyaDB messages
+    let allMsgs = KulliyaDB.getChatMessages();
+    if(!allMsgs[target]) allMsgs[target] = [];
+    const now = new Date(); const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    allMsgs[target].push({ me: true, text: val, time, read: true });
+    KulliyaDB.saveChatMessages(allMsgs);
+
+    KulliyaDB.showToast('✨ تم إرسال ردك המباشر إلى ' + target + ' وحفظه في المحادثات ✓');
+  }
+
+  function openSettings() { document.getElementById('settingsOverlay').classList.add('show'); }
+  function handleSettingsOverlay(e) { if (e.target === document.getElementById('settingsOverlay')) closeSettings(); }
+  function closeSettings() { document.getElementById('settingsOverlay').classList.remove('show'); }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSettings(); closeQR(); } });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0ab63864ba92820',t:'MTc4MTI5Mzg3MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

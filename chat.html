@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — المحادثات الجامعية المباشرة الأكاديمية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Universal SDK API & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --bg2: #0e0e0b;
+      --bg3: #131310;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #7a6230;
+      --gold-faint: rgba(201,168,76,0.08);
+      --cream: #f5f0e8;
+      --cream-dim: #9a9488;
+      --border: rgba(201,168,76,0.12);
+      --bubble-me: rgba(201,168,76,0.15);
+      --bubble-them: #131310;
+      --red: #e05c7a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Amiri', 'Times New Roman', serif;
+      min-height: 100vh;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.25;
+    }
+
+    /* ===== LAYOUT ===== */
+    .chat-app {
+      display: flex;
+      height: 100vh;
+      max-width: 1024px;
+      margin: 0 auto;
+      position: relative;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    /* ===== LEFT PANEL — CONVERSATIONS LIST ===== */
+    .conv-panel {
+      width: 340px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      border-left: 1px solid var(--border);
+      background: var(--bg2); height: 100vh;
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      position: relative; z-index: 20;
+    }
+
+    .conv-header {
+      padding: 0 20px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .conv-title { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.6rem; color: var(--cream); font-weight: bold; }
+    .conv-header-btns { display: flex; gap: 8px; }
+    .icon-btn {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--cream-dim); font-size: 1.1rem;
+      cursor: pointer; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; border-radius: 6px; font-weight: bold;
+    }
+    .icon-btn:hover { color: var(--gold); border-color: var(--gold); background: var(--gold-faint); transform: scale(1.05); }
+
+    /* Search in conv */
+    .conv-search { padding: 12px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .conv-search-input {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      color: var(--cream); padding: 10px 16px; font-family: 'Amiri', serif; font-size: 0.95rem;
+      outline: none; border-radius: 20px; text-align: right; transition: all 0.2s;
+    }
+    .conv-search-input:focus { border-color: var(--gold); background: var(--gold-faint); }
+    .conv-search-input::placeholder { color: var(--cream-dim); opacity: 0.5; }
+
+    /* Tabs: DMs / Groups */
+    .conv-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .conv-tab {
+      flex: 1; padding: 14px; text-align: center; font-family: 'Space Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream-dim); cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.2s; user-select: none; font-weight: bold;
+    }
+    .conv-tab.active { color: var(--gold); border-bottom-color: var(--gold); background: var(--gold-faint); }
+    .conv-tab:hover { color: var(--cream); }
+
+    /* Conversation list */
+    .conv-list { flex: 1; overflow-y: auto; padding-bottom: 90px; }
+    .conv-list::-webkit-scrollbar { width: 0; }
+
+    .conv-item {
+      display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+      border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; position: relative;
+    }
+    .conv-item:hover { background: rgba(201,168,76,0.04); }
+    .conv-item.active { background: var(--gold-faint); border-right: 4px solid var(--gold); }
+    .conv-item.unread .conv-name { color: var(--gold-light); font-weight: bold; }
+    .conv-item.unread .conv-last { color: var(--cream); font-weight: bold; }
+
+    .conv-avatar { position: relative; flex-shrink: 0; }
+    .conv-pic {
+      width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.3rem; color: var(--cream); border: 1px solid var(--border); font-weight: bold;
+    }
+    .conv-pic.group { border-radius: 12px; }
+    .online-dot { position: absolute; bottom: 1px; right: 1px; width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; border: 2px solid var(--bg2); }
+
+    .conv-body { flex: 1; min-width: 0; text-align: right; }
+    .conv-name { font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+    .conv-last { font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--cream-dim); margin-top: 4px; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-time { font-family: 'Space Mono', monospace; font-size: 0.5rem; color: var(--cream-dim); letter-spacing: 0.02em; flex-shrink: 0; align-self: flex-start; margin-top: 4px; }
+
+    /* ===== RIGHT PANEL — CHAT VIEW ===== */
+    .chat-panel { flex: 1; display: flex; flex-direction: column; height: 100vh; background: var(--bg); position: relative; z-index: 10; }
+
+    .chat-header {
+      height: 60px; display: flex; align-items: center; gap: 14px; padding: 0 20px;
+      border-bottom: 1px solid var(--border); background: rgba(10,10,8,0.95); backdrop-filter: blur(16px); flex-shrink: 0;
+    }
+    .chat-back { background: none; border: none; color: var(--cream-dim); font-size: 1.3rem; cursor: pointer; padding: 4px; display: none; font-weight: bold; }
+    .chat-header-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.2rem; color: var(--cream); flex-shrink: 0; font-weight: bold; border: 1px solid var(--border); }
+    .chat-header-avatar.group { border-radius: 8px; }
+    .chat-header-info { flex: 1; text-align: right; }
+    .chat-header-name { font-family: 'Amiri', serif; font-size: 1.15rem; color: var(--cream); font-weight: bold; }
+    .chat-header-status { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); letter-spacing: 0.03em; margin-top: 2px; }
+    .chat-header-status.online { color: #4CAF50; font-weight: bold; }
+
+    /* Empty state */
+    .chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 20px; text-align: center; }
+    .chat-empty-icon { font-size: 3.5rem; opacity: 0.2; }
+    .chat-empty-text { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--gold); margin-bottom: 6px; font-weight: bold; }
+    .chat-empty-sub { font-size: 0.9rem; color: var(--cream-dim); max-width: 360px; line-height: 1.6; }
+
+    /* Messages area — Margin bottom permanently fixed */
+    .messages-area {
+      flex: 1; overflow-y: auto;
+      padding: 24px 20px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .messages-area::-webkit-scrollbar { width: 4px; }
+    .messages-area::-webkit-scrollbar-track { background: transparent; }
+    .messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Date separator */
+    .msg-date-sep { text-align: center; font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--gold); letter-spacing: 0.1em; margin: 14px 0; display: flex; align-items: center; gap: 12px; font-weight: bold; }
+    .msg-date-sep::before, .msg-date-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Message bubble */
+    .msg-row { display: flex; align-items: flex-end; gap: 10px; max-width: 82%; animation: fadeIn 0.2s ease; }
+    .msg-row.me { align-self: flex-start; flex-direction: row-reverse; }
+    .msg-row.them { align-self: flex-end; }
+
+    .msg-bubble-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1rem; color: var(--cream); flex-shrink: 0; border: 1px solid var(--border); font-weight: bold; }
+
+    .msg-bubble { padding: 12px 18px; border-radius: 18px; font-family: 'Amiri', serif; font-size: 1.05rem; line-height: 1.6; max-width: 100%; word-break: break-word; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .msg-row.me .msg-bubble { background: var(--bubble-me); border: 1px solid rgba(201,168,76,0.3); border-bottom-right-radius: 4px; text-align: right; color: var(--cream); }
+    .msg-row.them .msg-bubble { background: var(--bubble-them); border: 1px solid var(--border); border-bottom-left-radius: 4px; text-align: right; color: var(--cream); }
+
+    .msg-time { font-family: 'Space Mono', monospace; font-size: 0.48rem; color: var(--cream-dim); letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; padding-bottom: 2px; }
+    .msg-sender-name { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--gold-light); font-weight: bold; letter-spacing: 0.05em; margin-bottom: 4px; text-align: right; }
+
+    /* Read receipts */
+    .msg-status { font-size: 0.7rem; color: var(--gold-dim); display: inline-block; margin-right: 6px; font-weight: bold; }
+    .msg-status.read { color: var(--gold); }
+
+    /* Reactions */
+    .msg-reactions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .reaction-pill { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 3px 10px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    .reaction-pill:hover { border-color: var(--gold); background: var(--gold-faint); transform: scale(1.08); }
+    .reaction-count { font-family: 'Space Mono', monospace; font-size: 0.5rem; color: var(--cream); font-weight: bold; }
+
+    /* Typing indicator */
+    .typing-indicator { display: none; align-self: flex-end; background: var(--bubble-them); border: 1px solid var(--border); border-radius: 18px; border-bottom-left-radius: 4px; padding: 12px 18px; gap: 6px; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .typing-indicator.show { display: flex; }
+    .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: typingBounce 1.2s ease-in-out infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; box-shadow: 0 0 6px var(--gold); } }
+
+    /* Input Area */
+    .chat-input-area {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: flex-end; gap: 12px;
+      flex-shrink: 0; background: var(--bg2);
+      position: relative; z-index: 15;
+    }
+    .chat-input-wrap { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 24px; display: flex; align-items: flex-end; padding: 6px 16px; gap: 10px; transition: all 0.2s; box-shadow: inset 0 2px 8px rgba(0,0,0,0.4); }
+    .chat-input-wrap:focus-within { border-color: var(--gold); background: #151512; }
+    .chat-input { flex: 1; background: none; border: none; color: var(--cream); font-family: 'Amiri', serif; font-size: 1.05rem; outline: none; resize: none; max-height: 120px; line-height: 1.5; padding: 7px 0; text-align: right; }
+    .chat-input::placeholder { color: var(--cream-dim); opacity: 0.4; }
+    .chat-input-tools { display: flex; align-items: center; gap: 4px; padding-bottom: 6px; }
+    .chat-tool { background: none; border: none; color: var(--gold-dim); font-size: 1.1rem; cursor: pointer; padding: 4px; transition: all 0.2s; border-radius: 50%; }
+    .chat-tool:hover { color: var(--gold); background: var(--gold-faint); transform: scale(1.1); }
+
+    .send-btn { width: 44px; height: 44px; background: var(--gold); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--bg); font-size: 1.2rem; font-weight: bold; flex-shrink: 0; transition: all 0.2s; box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+    .send-btn:hover { background: var(--gold-light); transform: scale(1.06); box-shadow: 0 6px 20px rgba(201,168,76,0.5); }
+    .send-btn:active { transform: scale(0.95); box-shadow: none; }
+
+    /* ===== MODALS ===== */
+    .custom-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 400; display: none; align-items: flex-end; justify-content: center; animation: fadeIn 0.25s ease; }
+    .custom-modal-overlay.show { display: flex; }
+    .custom-modal { background: var(--bg2); border: 1px solid var(--border); border-bottom: none; width: 100%; max-width: 640px; border-radius: 16px 16px 0 0; padding: 20px 28px 48px; box-shadow: 0 -10px 50px rgba(0,0,0,0.8); text-align: right; }
+    .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-title { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; font-weight: bold; }
+    .form-field { margin-bottom: 18px; }
+    .form-field label { display: block; font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--gold-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
+    .form-field input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--cream); padding: 12px 16px; font-family: 'Amiri', serif; font-size: 1.05rem; outline: none; transition: all 0.2s; text-align: right; border-radius: 6px; }
+    .form-field input:focus { border-color: var(--gold); background: var(--gold-faint); }
+    .modal-btn { width: 100%; background: var(--gold); color: var(--bg); border: none; padding: 14px; font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.15em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; margin-top: 12px; border-radius: 6px; font-weight: bold; }
+    .modal-btn:hover { background: var(--gold-light); box-shadow: 0 4px 20px rgba(201,168,76,0.4); }
+
+    /* Member pick */
+    .member-search-list { max-height: 240px; overflow-y: auto; border: 1px solid var(--border); margin-bottom: 18px; border-radius: 6px; background: var(--bg); }
+    .member-search-list::-webkit-scrollbar { width: 0; }
+    .member-pick-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .member-pick-item:last-child { border-bottom: none; }
+    .member-pick-item:hover, .member-pick-item.selected { background: var(--bg2); }
+    .member-check { width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: transparent; flex-shrink: 0; margin-right: auto; transition: all 0.2s; font-weight: bold; }
+    .member-pick-item.selected .member-check { background: var(--gold); color: var(--bg); border-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
+    .member-pick-pic { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.1rem; color: var(--cream); flex-shrink: 0; border: 1px solid var(--border); font-weight: bold; background: linear-gradient(135deg, #1a2a3a, #2d4e6e); }
+    .member-pick-name { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--cream); text-align: right; font-weight: bold; }
+    .member-pick-uni { font-family: 'Space Mono', monospace; font-size: 0.5rem; color: var(--cream-dim); margin-top: 2px; }
+
+    /* BOTTOM NAV */
+    .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: rgba(10,10,8,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); z-index: 150; align-items: center; justify-content: space-around; padding: 0 8px; }
+    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; color: var(--cream-dim); cursor: pointer; transition: color 0.2s; text-decoration: none; position: relative; }
+    .bottom-nav-item.active { color: var(--gold); font-weight: bold; }
+    .bottom-nav-icon { font-size: 1.3rem; }
+    .bottom-nav-label { font-family: 'Space Mono', monospace; font-size: 0.45rem; letter-spacing: 0.05em; }
+    .bottom-nav-add { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 12px; cursor: pointer; background: none; border: none; }
+    .bottom-nav-add-icon { width: 36px; height: 36px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--bg); font-weight: bold; line-height: 1; transition: all 0.2s; }
+    .bottom-nav-add:hover .bottom-nav-add-icon { background: var(--gold-light); transform: scale(1.05); }
+
+    /* Emoji picker */
+    .emoji-row { display: flex; gap: 8px; padding: 8px 20px 12px; overflow-x: auto; border-top: 1px solid var(--border); background: var(--bg); }
+    .emoji-row::-webkit-scrollbar { display: none; }
+    .emoji-btn { background: var(--bg2); border: 1px solid var(--border); font-size: 1.4rem; cursor: pointer; width: 38px; height: 38px; border-radius: 8px; transition: all 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .emoji-btn:hover { background: var(--gold-faint); border-color: var(--gold); transform: scale(1.1); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg2); border: 1px solid var(--gold); color: var(--gold);
+      font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 12px 24px;
+      letter-spacing: 0.1em; z-index: 1000; opacity: 0; transition: all 0.3s ease;
+      pointer-events: none; border-radius: 6px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); font-weight: bold; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .conv-panel { position: absolute; left: 0; right: 0; width: 100%; z-index: 30; }
+      .conv-panel.hidden { transform: translateX(100%); pointer-events: none; }
+      .chat-panel { width: 100%; }
+      .chat-back { display: block; color: var(--cream-dim); transition: color 0.2s; }
+      .chat-back:hover { color: var(--gold); }
+      .chat-app { border: none; }
+      .chat-input-area { margin-bottom: 60px; }
+      .conv-list { padding-bottom: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-app">
+
+  <!-- ===== CONVERSATIONS PANEL ===== -->
+  <div class="conv-panel" id="convPanel">
+
+    <div class="conv-header">
+      <div class="conv-header-btns">
+        <button class="icon-btn" onclick="openNewGroup()" title="مجموعة دراسية جديدة">✏️</button>
+        <button class="icon-btn" onclick="openNewDM()" title="محادثة خاصة جديدة">+</button>
+      </div>
+      <div class="conv-title">المحادثات</div>
+    </div>
+
+    <div class="conv-search">
+      <input class="conv-search-input" placeholder="بحث في المحادثات..." oninput="searchConvs(this.value)" />
+    </div>
+
+    <div class="conv-tabs">
+      <div class="conv-tab active" onclick="switchConvTab('dms', this)">الرسائل الفردية</div>
+      <div class="conv-tab" onclick="switchConvTab('groups', this)">المجموعات الدراسية</div>
+    </div>
+
+    <div class="conv-list" id="convList">
+      <!-- DM & Group lists dynamic loaded from KulliyaDB Engine -->
+      <div class="conv-section" id="section-dms"></div>
+      <div class="conv-section" id="section-groups" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ===== CHAT PANEL ===== -->
+  <div class="chat-panel" id="chatPanel">
+
+    <div class="chat-header" id="chatHeader">
+      <button class="chat-back" onclick="backToList()" title="العودة للقائمة">←</button>
+      <div class="chat-header-avatar" id="chatHeaderAvatar" style="background:linear-gradient(135deg,#3a1a1a,#6e4e2d)">ط</div>
+      <div class="chat-header-info"><div class="chat-header-name" id="chatHeaderName">الحرم الجامعي المباشر</div><div class="chat-header-status online" id="chatHeaderStatus">متصل ومستعد للمراسلة</div></div>
+      <button class="icon-btn" title="معلومات المحادثة" onclick="KulliyaDB.showToast('خيارات المحادثة')">⋯</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-area" id="messagesArea">
+      <!-- Dynamic messages loaded here -->
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area" id="chatInputArea">
+      <div class="chat-input-wrap">
+        <div class="chat-input-tools"><button class="chat-tool" title="إضافة صورة" onclick="KulliyaDB.showToast('إرفاق صورة 🖼️')">🖼️</button><button class="chat-tool" title="إضافة ملف PDF" onclick="KulliyaDB.showToast('إرفاق ملف PDF 📎')">📎</button></div>
+        <textarea class="chat-input" id="chatInput" placeholder="اكتب رسالتك المباشرة هنا..." rows="1" oninput="autoResize(this); showTyping()" onkeydown="handleKey(event)"></textarea>
+        <div class="chat-input-tools"><button class="chat-tool" onclick="toggleEmoji()" title="الرموز التعبيرية">😊</button></div>
+      </div>
+      <button class="send-btn" onclick="sendPersistentMessage()" title="إرسال">↑</button>
+    </div>
+
+    <!-- Quick emoji row -->
+    <div class="emoji-row" id="emojiRow" style="display:none;">
+      <button class="emoji-btn" onclick="insertEmoji('😊')">😊</button>
+      <button class="emoji-btn" onclick="insertEmoji('🙏')">🙏</button>
+      <button class="emoji-btn" onclick="insertEmoji('🔥')">🔥</button>
+      <button class="emoji-btn" onclick="insertEmoji('💪')">💪</button>
+      <button class="emoji-btn" onclick="insertEmoji('👍')">👍</button>
+      <button class="emoji-btn" onclick="insertEmoji('❤️')">❤️</button>
+      <button class="emoji-btn" onclick="insertEmoji('😂')">😂</button>
+      <button class="emoji-btn" onclick="insertEmoji('🎉')">🎉</button>
+      <button class="emoji-btn" onclick="insertEmoji('📚')">📚</button>
+      <button class="emoji-btn" onclick="insertEmoji('✅')">✅</button>
+      <button class="emoji-btn" onclick="insertEmoji('⚡')">⚡</button>
+      <button class="emoji-btn" onclick="insertEmoji('🌿')">🌿</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ===== NEW GROUP MODAL ===== -->
+<div class="custom-modal-overlay" id="newGroupOverlay" onclick="if(event.target===this) closeModal('newGroupOverlay')">
+  <div class="custom-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div class="modal-title">تأسيس مجموعة دراسية حقيقية</div><button style="background:none;border:none;color:var(--cream-dim);font-size:1.2rem;cursor:pointer;" onclick="closeModal('newGroupOverlay')">✕</button></div>
+
+    <div class="form-field">
+      <label>اسم المجموعة</label>
+      <input type="text" id="groupName" placeholder="مثال: مجموعة البيوتكنولوجيا س3" onkeydown="if(event.key==='Enter') document.getElementById('groupDesc').focus()"/>
+    </div>
+
+    <div class="form-field">
+      <label>وصف المجموعة (اختياري)</label>
+      <input type="text" id="groupDesc" placeholder="مثال: لمناقشة مواضيع المقياس ومشاركة الملخصات" onkeydown="if(event.key==='Enter') createGroup()"/>
+    </div>
+
+    <div class="form-field">
+      <label>إضافة أعضاء (انقر لتحديد زملائك)</label>
+      <div class="member-search-list" id="memberPickList">
+        <div class="member-pick-item selected" onclick="toggleMember(this)"><div class="member-check">✓</div><div class="member-pick-pic" style="background:linear-gradient(135deg,#3a1a1a,#6e4e2d)">أ</div><div><div class="member-pick-name">أمينة بن عمر</div><div class="member-pick-uni">USTHB · هندسة المعلوماتية</div></div></div>
+        <div class="member-pick-item selected" onclick="toggleMember(this)"><div class="member-check">✓</div><div class="member-pick-pic" style="background:linear-gradient(135deg,#1a2a3a,#2d4e6e)">ر</div><div><div class="member-pick-name">رضا بوزيد</div><div class="member-pick-uni">USTHB · رياضيات</div></div></div>
+        <div class="member-pick-item" onclick="toggleMember(this)"><div class="member-check">✓</div><div class="member-pick-pic" style="background:linear-gradient(135deg,#2a1a3a,#4e2d6e)">ي</div><div><div class="member-pick-name">يوسف مزيان</div><div class="member-pick-uni">Université d'Oran · Droit</div></div></div>
+        <div class="member-pick-item selected" onclick="toggleMember(this)"><div class="member-check">✓</div><div class="member-pick-pic" style="background:linear-gradient(135deg,#2a3a1a,#4e6e2d)">س</div><div><div class="member-pick-name">سارة حمدي</div><div class="member-pick-uni">Université Constantine · Médecine</div></div></div>
+        <div class="member-pick-item" onclick="toggleMember(this)"><div class="member-check">✓</div><div class="member-pick-pic" style="background:linear-gradient(135deg,#1a2a1a,#2d6e2d)">ك</div><div><div class="member-pick-name">كريم عيساوي</div><div class="member-pick-uni">ENPO · Génie Civil</div></div></div>
+      </div>
+    </div>
+
+    <button class="modal-btn" onclick="createGroup()">تأسيس المجموعة وبدء المحادثة 🚀</button>
+  </div>
+</div>
+
+<!-- NEW DM MODAL -->
+<div class="custom-modal-overlay" id="newDMOverlay" onclick="if(event.target===this) closeModal('newDMOverlay')">
+  <div class="custom-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><div class="modal-title">محادثة خاصة جديدة</div><button style="background:none;border:none;color:var(--cream-dim);font-size:1.2rem;cursor:pointer;" onclick="closeModal('newDMOverlay')">✕</button></div>
+    <div class="form-field">
+      <label>إلى (اختر من زملائك في الجامعة)</label>
+      <input type="text" placeholder="ابحث عن طالب باسمه أو تخصصه..." onkeydown="if(event.key==='Enter') KulliyaDB.showToast('جاري البحث...')"/>
+    </div>
+    <div class="member-search-list">
+      <div class="member-pick-item" onclick="closeModal('newDMOverlay'); executeStartNewChat('نور الهدى قاسمي','#3a2a1a,#6e4e2d','ن')"><div class="member-pick-pic" style="background:linear-gradient(135deg,#3a2a1a,#6e4e2d)">ن</div><div><div class="member-pick-name">نور الهدى قاسمي</div><div class="member-pick-uni">USTHB · هندسة المعلوماتية</div></div></div>
+      <div class="member-pick-item" onclick="closeModal('newDMOverlay'); executeStartNewChat('لينة خالد','#2a1a3a,#4e2d6e','ل')"><div class="member-pick-pic" style="background:linear-gradient(135deg,#2a1a3a,#4e2d6e)">ل</div><div><div class="member-pick-name">لينة خالد</div><div class="member-pick-uni">Univ. Alger · Droit</div></div></div>
+      <div class="member-pick-item" onclick="closeModal('newDMOverlay'); executeStartNewChat('محمد بن سالم','#7a6230,#2d6e4e','م')"><div class="member-pick-pic" style="background:linear-gradient(135deg,#7a6230,#2d6e4e)">م</div><div><div class="member-pick-name">محمد بن سالم</div><div class="member-pick-uni">USTHB · قسم الرياضيات</div></div></div>
+      <div class="member-pick-item" onclick="closeModal('newDMOverlay'); executeStartNewChat('أمينة بن عمر','#3a1a1a,#6e4e2d','أ')"><div class="member-pick-pic" style="background:linear-gradient(135deg,#3a1a1a,#6e4e2d)">أ</div><div><div class="member-pick-name">أمينة بن عمر</div><div class="member-pick-uni">USTHB · هندسة المعلوماتية</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV FOR MOBILE -->
+<nav class="bottom-nav">
+  <a href="feed.html" class="bottom-nav-item"><span class="bottom-nav-icon">🏠</span><span class="bottom-nav-label">الرئيسية</span></a>
+  <a href="inbox.html" class="bottom-nav-item"><span class="bottom-nav-icon">🔔</span><span class="bottom-nav-label">الإشعارات</span></a>
+  <button class="bottom-nav-add" onclick="window.location.href='feed.html'"><div class="bottom-nav-add-icon">+</div></button>
+  <a href="chat.html" class="bottom-nav-item active"><span class="bottom-nav-icon">💬</span><span class="bottom-nav-label">المحادثات</span></a>
+  <a href="profile.html" class="bottom-nav-item"><span class="bottom-nav-icon">👤</span><span class="bottom-nav-label">البروفايل</span></a>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentActiveChat = null;
+  let isGroup = false; let typingTimer;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderPersistedConversationsList();
+
+    const target = localStorage.getItem('targetChat');
+    if (target) {
+      localStorage.removeItem('targetChat');
+      executeStartNewChat(target, '#3a1a1a,#6e4e2d', target.charAt(0));
+    }
+  });
+
+  function selectItem(el) { document.querySelectorAll('.conv-item').forEach(i=>i.classList.remove('active')); if(el) el.classList.add('active'); }
+
+  function executeStartNewChat(name, gradient, avatar) {
+    KulliyaDB.startNewConversation(name, gradient, avatar, false);
+    renderPersistedConversationsList();
+    openPersistedChat(name, gradient, avatar, 'متصل مباشر', true, false);
+  }
+
+  function renderPersistedConversationsList() {
+    let allConvs = KulliyaDB.getChatConversations();
+
+    const dmsSec = document.getElementById("section-dms");
+    const grpsSec = document.getElementById("section-groups");
+    dmsSec.innerHTML = ""; grpsSec.innerHTML = "";
+
+    // Empty state
+    if (allConvs.length === 0) {
+      dmsSec.innerHTML = `
+        <div style="padding:60px 20px; text-align:center; color:var(--cream-dim);">
+          <div style="font-size:3rem; margin-bottom:12px; opacity:0.3;">💬</div>
+          <div style="font-family:'Space Mono', monospace; font-size:0.8rem; color:var(--gold); margin-bottom:8px;">لا توجد محادثات نشطة</div>
+          <div style="font-size:0.85rem; line-height:1.6;">انقر على الزر (+) أعلاه لاختيار زميل وبدء المراسلة المباشرة.</div>
+          <button style="margin-top:16px; padding:8px 16px; background:var(--gold); color:var(--bg); border:none; border-radius:4px; font-family:'Space Mono',monospace; font-weight:bold; font-size:0.65rem; cursor:pointer;" onclick="openNewDM()">+ محادثة جديدة</button>
+        </div>
+      `;
+      openImmaculateEmptyChatPanel();
+      return;
+    }
+
+    allConvs.forEach(c => {
+      const itemEl = document.createElement("div");
+      itemEl.className = "conv-item" + (c.name === currentActiveChat ? " active" : "");
+      itemEl.onclick = () => openPersistedChat(c.name, c.gradient, c.avatar, c.status, true, c.is_group);
+      
+      itemEl.innerHTML = `
+        <div class="conv-avatar">
+          <div class="conv-pic${c.is_group ? ' group' : ''}" style="background:linear-gradient(135deg,${c.gradient});">${c.avatar}</div>
+          <div class="online-dot" style="${c.is_group ? 'display:none;' : ''}"></div>
+        </div>
+        <div class="conv-body">
+          <div class="conv-name">${c.name}</div>
+          <div class="conv-last" id="last-msg-${c.name}">${c.last_msg || 'محادثة مباشرة'}</div>
+        </div>
+        <div class="conv-time">الآن</div>
+      `;
+
+      if (c.is_group) grpsSec.appendChild(itemEl);
+      else dmsSec.appendChild(itemEl);
+    });
+
+    if (!currentActiveChat && allConvs.length > 0) {
+      const first = allConvs[0]; openPersistedChat(first.name, first.gradient, first.avatar, first.status, true, first.is_group);
+    }
+  }
+
+  function openImmaculateEmptyChatPanel() {
+    currentActiveChat = null;
+    document.getElementById('chatHeaderName').textContent = "مرحبًا بك في الرسائل الخاصة";
+    document.getElementById('chatHeaderStatus').textContent = "شبكة كلية الأكاديمية";
+    document.getElementById('chatHeaderAvatar').textContent = "💬";
+    document.getElementById('chatHeaderAvatar').style.background = "var(--gold-dim)";
+
+    const area = document.getElementById('messagesArea');
+    area.innerHTML = `
+      <div class="chat-empty">
+        <div class="chat-empty-icon">💬</div>
+        <div class="chat-empty-text">تطبيق المراسلة المباشرة DMs</div>
+        <div class="chat-empty-sub">المحادثات الخاصة مشفرة ومحفوظة بالكامل. ابدأ محادثة جديدة للتواصل الفوري مع زملائك في الحرم.</div>
+      </div>
+    `;
+  }
+
+  function openPersistedChat(name, gradient, avatar, status, online, group) {
+    isGroup = group; currentActiveChat = name;
+    document.getElementById('chatHeaderName').textContent = name;
+    document.getElementById('chatHeaderStatus').textContent = status;
+    document.getElementById('chatHeaderStatus').className = 'chat-header-status' + (online ? ' online' : '');
+    
+    const ha = document.getElementById('chatHeaderAvatar');
+    ha.style.background = `linear-gradient(135deg,${gradient})`; ha.textContent = avatar; ha.className = 'chat-header-avatar' + (group ? ' group' : '');
+
+    renderChatPersistedMessages(name, group, gradient);
+
+    if (window.innerWidth <= 768) document.getElementById('convPanel').classList.add('hidden');
+
+    selectItem(Array.from(document.querySelectorAll('.conv-item')).find(i => i.querySelector('.conv-name')?.textContent.trim() === name));
+  }
+
+  function backToList() { document.getElementById('convPanel').classList.remove('hidden'); }
+
+  function addReact(pill) { const cnt=pill.querySelector('.reaction-count'); if(cnt) cnt.textContent=parseInt(cnt.textContent)+1; KulliyaDB.showToast('✓ أضفت تفاعلك'); }
+
+  function renderChatPersistedMessages(name, group, activeGradient) {
+    let allMessages = KulliyaDB.getChatMessages();
+    const msgs = allMessages[name] || [];
+
+    const area = document.getElementById('messagesArea');
+    area.innerHTML = `<div class="msg-date-sep">مراسلات المحادثة المباشرة (${name})</div>`;
+
+    if (msgs.length === 0) {
+      area.innerHTML += `
+        <div style="padding:40px 20px; text-align:center; color:var(--cream-dim);" id="freshChatPrompt">
+          <div style="font-family:'Space Mono',monospace; font-size:0.8rem; color:var(--gold); margin-bottom:6px;">المحادثة جديدة بالكامل</div>
+          <div style="font-size:0.95rem; line-height:1.6;">اكتب رسالتك الأولى لزميلك في الأسفل وسيتم تسليمها وحفظها فورياً.</div>
+        </div>
+      `;
+    }
+
+    msgs.forEach((m) => {
+      const row = document.createElement('div'); row.className = 'msg-row ' + (m.me ? 'me' : 'them');
+      let inner = '';
+      if (!m.me) inner += `<div class="msg-bubble-avatar" style="background:linear-gradient(135deg,${m.grad || activeGradient || '#3a1a1a,#6e4e2d'})">${m.avatar || name.charAt(0)}</div>`;
+      const status = m.read ? '<span class="msg-status read">✓✓</span>' : (m.me ? '<span class="msg-status">✓</span>' : '');
+      const reactions = m.reactions ? `<div class="msg-reactions">${m.reactions.map(r=>`<div class="reaction-pill" onclick="addReact(this)">${r.e} <span class="reaction-count">${r.c}</span></div>`).join('')}</div>` : '';
+      const senderLabel = group && !m.me && m.sender ? `<div class="msg-sender-name">${m.sender}</div>` : '';
+
+      inner += `<div>${senderLabel}<div class="msg-bubble">${m.text}${status}</div>${reactions}</div>`;
+      row.innerHTML = inner + `<div class="msg-time">${m.time}</div>`;
+      area.appendChild(row);
+    });
+
+    const lastMsgEl = document.getElementById("last-msg-" + name);
+    if(lastMsgEl && msgs.length > 0) {
+      const lm = msgs[msgs.length - 1]; lastMsgEl.textContent = (lm.me ? 'أنت: ' : '') + lm.text;
+    }
+
+    const typing = document.createElement('div'); typing.className = 'typing-indicator'; typing.id = 'typingIndicator';
+    typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+    area.appendChild(typing); scrollToBottom();
+  }
+
+  async function sendPersistentMessage() {
+    if(!currentActiveChat) { KulliyaDB.showToast('اختر أو ابدأ محادثة من القائمة أولاً!'); return; }
+    
+    const input = document.getElementById('chatInput'); const text = input.value.trim();
+    if (!text) { KulliyaDB.showToast('اكتب رسالة أولاً!'); return; }
+
+    const area = document.getElementById('messagesArea');
+    const freshPrompt = document.getElementById("freshChatPrompt");
+    if (freshPrompt) freshPrompt.remove();
+
+    const typing = document.getElementById('typingIndicator');
+    const row = document.createElement('div'); row.className = 'msg-row me';
+    const now = new Date(); const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    row.innerHTML = `<div><div class="msg-bubble">${text.replace(/\n/g, '<br/>')}<span class="msg-status">✓</span></div></div><div class="msg-time">${time}</div>`;
+    area.insertBefore(row, typing);
+
+    input.value = ''; input.style.height = 'auto'; scrollToBottom();
+
+    // Persist fully
+    let allMessages = KulliyaDB.getChatMessages();
+    if(!allMessages[currentActiveChat]) allMessages[currentActiveChat] = [];
+    allMessages[currentActiveChat].push({ me: true, text, time, read: true });
+    KulliyaDB.saveChatMessages(allMessages);
+
+    let allConvs = KulliyaDB.getChatConversations();
+    let cTarget = allConvs.find(c => c.name === currentActiveChat);
+    if(cTarget) { cTarget.last_msg = 'أنت: ' + text; localStorage.setItem("kulliya_active_convs", JSON.stringify(allConvs)); }
+
+    const activeConv = document.querySelector('.conv-item.active .conv-last');
+    if (activeConv) activeConv.textContent = 'أنت: ' + text;
+
+    const supa = KulliyaDB.getClient();
+    if (supa) { try { await supa.from('messages').insert([{ content: text }]); } catch(e) {} }
+
+    setTimeout(() => { const st=row.querySelector('.msg-status'); if(st) { st.classList.add('read'); st.textContent='✓✓'; } }, 1200);
+
+    // Dynamic smart response after 1.5s
+    if (!isGroup) {
+      setTimeout(() => {
+        typing.classList.add('show'); scrollToBottom();
+        setTimeout(() => {
+          typing.classList.remove('show');
+          const reply = document.createElement('div'); reply.className = 'msg-row them';
+          const name = document.getElementById('chatHeaderName').textContent;
+          const init = isGroup ? 'أ' : name.charAt(0);
+          const grad = isGroup ? '#3a1a1a,#6e4e2d' : (document.getElementById('chatHeaderAvatar').style.background.match(/rgb[^)]+\)/)?.[0] || '#1a2a3a,#2d4e6e');
+          const avatarHtml = `<div class="msg-bubble-avatar" style="background:${grad}">${init}</div>`;
+          const senderLabel = isGroup ? `<div class="msg-sender-name">أمينة بن عمر</div>` : '';
+          
+          const replies = ['شكراً جزيلاً 🙏', 'تمام اتفقنا 👍', 'كلام سليم 🌟', 'سأطلع على الأمر الآن 📚', 'بارك الله فيك يا أخي ❤️', 'وصلت الرسالة ✅'];
+          const randomReply = replies[Math.floor(Math.random() * replies.length)];
+          const replyTime = new Date(); const rt = replyTime.getHours().toString().padStart(2,'0') + ':' + replyTime.getMinutes().toString().padStart(2,'0');
+          
+          reply.innerHTML = `${avatarHtml}<div>${senderLabel}<div class="msg-bubble">${randomReply}</div></div><div class="msg-time">${rt}</div>`;
+          area.insertBefore(reply, typing);
+
+          allMessages[currentActiveChat].push({ me: false, text: randomReply, time: rt, grad, avatar: init });
+          KulliyaDB.saveChatMessages(allMessages);
+
+          if(cTarget) { cTarget.last_msg = randomReply; localStorage.setItem("kulliya_active_convs", JSON.stringify(allConvs)); }
+          if (activeConv) activeConv.textContent = randomReply;
+          
+          scrollToBottom();
+        }, 2200);
+      }, 1500);
+    }
+  }
+
+  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendPersistentMessage(); } }
+  function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+  function showTyping() { clearTimeout(typingTimer); }
+  function scrollToBottom() { const area = document.getElementById('messagesArea'); requestAnimationFrame(() => { area.scrollTop = area.scrollHeight; }); }
+  function toggleEmoji() { const row = document.getElementById('emojiRow'); row.style.display = row.style.display === 'none' ? 'flex' : 'none'; }
+  function insertEmoji(e) { const input = document.getElementById('chatInput'); input.value += e; input.focus(); }
+
+  function switchConvTab(tab, btn) {
+    document.querySelectorAll('.conv-tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active');
+    document.getElementById('section-dms').style.display = tab === 'dms' ? 'block' : 'none';
+    document.getElementById('section-groups').style.display = tab === 'groups' ? 'block' : 'none';
+  }
+  function searchConvs(val) {
+    const v=val.toLowerCase(); document.querySelectorAll('.conv-item').forEach(i=>{ const n=i.querySelector('.conv-name').textContent.toLowerCase(); i.style.display = n.includes(v)?'':'none'; });
+  }
+
+  function openNewGroup() { document.getElementById('newGroupOverlay').classList.add('show'); setTimeout(()=>document.getElementById('groupName').focus(), 100); }
+  function openNewDM() { document.getElementById('newDMOverlay').classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+  function handleModalOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+  function toggleMember(i) { i.classList.toggle('selected'); }
+
+  function createGroup() {
+    const name = document.getElementById('groupName').value.trim(); if (!name) { KulliyaDB.showToast('أدخل اسم المجموعة أولاً'); return; }
+    closeModal('newGroupOverlay');
+    document.querySelectorAll('.conv-tab')[1].click();
+    
+    const emoji = ['📖','🧬','⚗️','🔭','🌍','💡'][Math.floor(Math.random()*6)];
+    const colors = ['#1a3a2a,#2d6e4e','#3a2a1a,#6e4e2d','#1a2a3a,#2d4e6e'];
+    const gradient = colors[Math.floor(Math.random()*colors.length)];
+    
+    KulliyaDB.startNewConversation(name, gradient, emoji, true);
+    renderPersistedConversationsList();
+    openPersistedChat(name, gradient, emoji, 'أنت والأعضاء المختارون', true, true);
+    KulliyaDB.showToast('✨ تم تأسيس مجموعتك الدراسية بنجاح ✓');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal('newGroupOverlay'); closeModal('newDMOverlay'); } });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0ab63173f4b2820',t:'MTc4MTI5Mzg1Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

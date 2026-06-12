@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — الحرم الجامعي الأكاديمي المباشر</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Universal SDK API & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --bg2: #0e0e0b;
+      --bg3: #131310;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #7a6230;
+      --gold-faint: rgba(201,168,76,0.08);
+      --cream: #f5f0e8;
+      --cream-dim: #9a9488;
+      --border: rgba(201,168,76,0.12);
+      --green: #1a3a2a;
+      --red: #e05c7a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Amiri', 'Times New Roman', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.25;
+    }
+
+    /* LAYOUT */
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      grid-template-rows: 60px 1fr;
+      min-height: 100vh;
+    }
+
+    /* TOP NAV — INSTAGRAM INSPIRED */
+    .topnav {
+      grid-column: 1 / -1;
+      background: rgba(10,10,8,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); display: flex;
+      align-items: center; justify-content: space-between;
+      padding: 0 24px; position: sticky; top: 0; z-index: 100;
+    }
+    .topnav-logo {
+      font-family: 'Scheherazade New', 'Amiri', serif;
+      font-size: 1.85rem; color: var(--gold);
+      text-shadow: 0 0 20px rgba(201,168,76,0.3);
+      text-decoration: none; font-weight: 700;
+    }
+    .topnav-search { flex: 1; max-width: 400px; margin: 0 32px; position: relative; }
+    .topnav-search input {
+      width: 100%; background: var(--gold-faint); border: 1px solid var(--border);
+      color: var(--cream); padding: 8px 16px 8px 40px; font-family: 'Amiri', serif;
+      font-size: 0.95rem; outline: none; transition: all 0.2s ease; border-radius: 6px; text-align: right;
+    }
+    .topnav-search input:focus { border-color: var(--gold); background: rgba(201,168,76,0.12); box-shadow: 0 0 12px rgba(201,168,76,0.2); }
+    .topnav-search input::placeholder { color: var(--cream-dim); opacity: 0.5; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gold-dim); font-size: 0.9rem; cursor: pointer; }
+    
+    .topnav-actions { display: flex; align-items: center; gap: 16px; }
+    .nav-icon-btn {
+      background: none; border: none; color: var(--cream-dim);
+      font-size: 1.25rem; cursor: pointer; padding: 6px;
+      transition: all 0.2s; position: relative; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; border-radius: 50%;
+    }
+    .nav-icon-btn:hover { color: var(--gold); background: var(--gold-faint); }
+    .nav-badge { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--red); border-radius: 50%; box-shadow: 0 0 8px var(--red); display: none; }
+    
+    .topnav-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dim), #2d6e4e);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.1rem;
+      color: var(--cream); cursor: pointer; border: 1px solid var(--border);
+      transition: all 0.2s; text-decoration: none; font-weight: bold;
+    }
+    .topnav-avatar:hover { border-color: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.3); }
+
+    /* LEFT SIDEBAR */
+    .sidebar-left {
+      background: var(--bg2); border-left: 1px solid var(--border);
+      padding: 24px 0; position: sticky; top: 60px;
+      height: calc(100vh - 60px); overflow-y: auto;
+    }
+    .sidebar-left::-webkit-scrollbar { width: 0; }
+
+    .sidebar-profile { padding: 0 20px 24px; border-bottom: 1px solid var(--border); text-align: center; }
+    .profile-avatar-lg {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dim), #2d6e4e);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.8rem;
+      color: var(--cream); margin: 0 auto 12px; border: 2px solid var(--gold-dim);
+      font-weight: bold; text-decoration: none; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .profile-name { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.25rem; color: var(--cream); margin-bottom: 4px; font-weight: 700; text-decoration: none; display: block; }
+    .profile-uni { font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--gold-dim); letter-spacing: 0.05em; }
+    .profile-verified { display: inline-flex; align-items: center; gap: 4px; background: rgba(201,168,76,0.1); border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Space Mono', monospace; font-size: 0.55rem; padding: 3px 8px; margin-top: 8px; border-radius: 4px; letter-spacing: 0.1em; font-weight: bold; }
+    
+    .profile-stats { display: flex; justify-content: space-around; margin-top: 16px; }
+    .stat { text-align: center; text-decoration: none; cursor: pointer; }
+    .stat-num { font-family: 'Space Mono', monospace; font-size: 1rem; color: var(--gold); display: block; font-weight: bold; }
+    .stat-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); letter-spacing: 0.05em; }
+
+    .sidebar-nav { padding: 16px 0; }
+    .sidebar-nav-item {
+      display: flex; align-items: center; gap: 14px; padding: 12px 24px;
+      color: var(--cream-dim); font-size: 1rem; cursor: pointer; transition: all 0.2s;
+      border-right: 3px solid transparent; text-decoration: none; user-select: none; font-weight: bold;
+    }
+    .sidebar-nav-item:hover { color: var(--cream); background: var(--gold-faint); }
+    .sidebar-nav-item.active { color: var(--gold); border-right-color: var(--gold); background: var(--gold-faint); }
+    .nav-item-icon { font-size: 1.2rem; width: 24px; text-align: center; }
+    .nav-item-label { font-family: 'Amiri', serif; font-size: 1.05rem; }
+
+    .sidebar-section-title { font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--gold-dim); letter-spacing: 0.2em; text-transform: uppercase; padding: 20px 24px 8px; font-weight: bold; }
+
+    /* MAIN FEED */
+    .main-feed {
+      border-right: 1px solid var(--border); border-left: 1px solid var(--border);
+      min-height: calc(100vh - 60px); background: var(--bg);
+      padding-bottom: 90px;
+    }
+
+    .feed-tabs {
+      display: flex; border-bottom: 1px solid var(--border); background: rgba(10,10,8,0.9);
+      backdrop-filter: blur(12px); position: sticky; top: 60px; z-index: 50;
+    }
+    .feed-tab { flex: 1; padding: 16px; text-align: center; font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--cream-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; user-select: none; font-weight: bold; }
+    .feed-tab:hover { color: var(--cream); background: var(--gold-faint); }
+    .feed-tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: bold; background: var(--gold-faint); }
+
+    /* POST COMPOSER — INSTAGRAM INSPIRED */
+    .composer { padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--bg2); box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+    .composer-inner { display: flex; gap: 16px; align-items: flex-start; }
+    .composer-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-dim), #2d6e4e); display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.2rem; color: var(--cream); flex-shrink: 0; border: 1px solid var(--border); font-weight: bold; }
+    .composer-right { flex: 1; }
+    .composer-textarea { width: 100%; background: transparent; border: none; color: var(--cream); font-family: 'Amiri', serif; font-size: 1.1rem; resize: none; outline: none; min-height: 64px; text-align: right; line-height: 1.6; }
+    .composer-textarea::placeholder { color: var(--cream-dim); opacity: 0.4; }
+    .composer-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .composer-tools { display: flex; gap: 16px; }
+    .composer-tool { background: none; border: none; color: var(--gold-dim); font-size: 1.15rem; cursor: pointer; transition: all 0.2s; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    .composer-tool:hover { color: var(--gold); background: var(--gold-faint); transform: scale(1.1); }
+    .composer-submit { background: var(--gold); color: var(--bg); border: none; padding: 10px 28px; font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 0.15em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; border-radius: 6px; font-weight: bold; }
+    .composer-submit:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+    .composer-submit:active { transform: translateY(1px); box-shadow: none; }
+
+    /* INSTAGRAM INSPIRED POSTS CARDS */
+    .post { padding: 24px; border-bottom: 1px solid var(--border); transition: all 0.3s ease; background: var(--bg); animation: fadeIn 0.3s ease; }
+    .post:hover { background: var(--bg2); }
+
+    .post-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .post-header-left { display: flex; align-items: center; gap: 12px; }
+    .post-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.2rem; color: var(--cream); flex-shrink: 0; border: 1px solid var(--border); font-weight: bold; text-decoration: none; }
+    .post-author { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.2rem; color: var(--cream); display: flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; }
+    .verified-badge { background: var(--gold); color: var(--bg); font-family: 'Space Mono', monospace; font-size: 0.5rem; padding: 2px 6px; letter-spacing: 0.05em; border-radius: 3px; font-weight: bold; }
+    .post-info { font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--cream-dim); margin-top: 1px; letter-spacing: 0.03em; text-align: right; }
+    .post-more { background: none; border: none; color: var(--red); cursor: pointer; padding: 4px 10px; font-size: 0.8rem; transition: all 0.2s; border-radius: 4px; font-family: 'Space Mono'; font-weight: bold; }
+    .post-more:hover { background: var(--red-faint); }
+
+    .post-content { font-size: 1.05rem; color: var(--cream); line-height: 1.75; text-align: right; margin-bottom: 16px; word-break: break-word; }
+    .post-content .tag { color: var(--gold); font-weight: 700; text-decoration: none; }
+    .post-content .tag:hover { text-decoration: underline; }
+
+    .post-image { width: 100%; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; background: var(--bg3); height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--gold-light); font-family: 'Space Mono', monospace; font-size: 0.8rem; letter-spacing: 0.08em; transition: all 0.2s; cursor: pointer; box-shadow: inset 0 0 40px rgba(0,0,0,0.6); }
+    .post-image:hover { border-color: var(--gold); background: #181815; }
+    .post-image-icon { font-size: 3rem; line-height: 1; }
+
+    /* Action bar */
+    .post-actions { display: flex; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
+    .post-action { display: flex; align-items: center; gap: 8px; background: none; border: none; color: var(--cream-dim); font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; cursor: pointer; padding: 6px 12px; transition: all 0.2s; border-radius: 4px; font-weight: bold; }
+    .post-action:hover { color: var(--gold); background: var(--gold-faint); }
+    .post-action.liked { color: var(--red); }
+    .post-action.saved { color: var(--gold); }
+    .post-action span { font-size: 1.2rem; }
+
+    /* CHANNEL POST */
+    .post.channel-post { border-right: 4px solid var(--gold); background: linear-gradient(90deg, rgba(201,168,76,0.03), transparent 20%); }
+
+    /* COMMENTS SECTION */
+    .comments-area { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); display: none; animation: fadeIn 0.3s ease; }
+    .comments-area.open { display: block; }
+    .comment-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+    .comment-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--gold-dim); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
+    .comment-body { flex: 1; background: var(--bg2); border: 1px solid var(--border); padding: 10px 14px; border-radius: 6px; text-align: right; }
+    .comment-name { font-weight: bold; font-size: 0.9rem; color: var(--cream); margin-bottom: 3px; }
+    .comment-text { font-size: 0.95rem; color: var(--cream-dim); line-height: 1.5; }
+    .comment-input-row { display: flex; gap: 10px; margin-top: 14px; }
+    .comment-input { flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--cream); padding: 10px 16px; font-family: 'Amiri', serif; font-size: 1rem; outline: none; border-radius: 6px; text-align: right; }
+    .comment-input:focus { border-color: var(--gold); background: var(--gold-faint); }
+    .comment-send-btn { background: var(--gold); color: var(--bg); border: none; padding: 10px 20px; font-family: 'Space Mono',monospace; font-weight: bold; font-size: 0.68rem; border-radius: 6px; cursor: pointer; }
+
+    /* RIGHT SIDEBAR */
+    .sidebar-right {
+      background: var(--bg2); border-right: 1px solid var(--border);
+      padding: 24px 20px; position: sticky; top: 60px;
+      height: calc(100vh - 60px); overflow-y: auto;
+    }
+    .sidebar-right::-webkit-scrollbar { width: 0; }
+
+    .widget { margin-bottom: 32px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .widget-title { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-weight: bold; }
+
+    /* Channels widget */
+    .channel-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .channel-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .channel-item:hover .channel-name { color: var(--gold); }
+    .channel-icon { width: 38px; height: 38px; background: var(--gold-faint); border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .channel-info { text-align: right; flex: 1; min-width: 0; }
+    .channel-name { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--cream); transition: color 0.2s; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .channel-members { font-family: 'Space Mono', monospace; font-size: 0.52rem; color: var(--cream-dim); letter-spacing: 0.05em; margin-top: 2px; }
+    .channel-join { background: none; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Space Mono', monospace; font-size: 0.5rem; padding: 4px 10px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; border-radius: 4px; font-weight: bold; flex-shrink: 0; }
+    .channel-join:hover { border-color: var(--gold); color: var(--cream); background: var(--gold); }
+    .channel-join.joined { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+
+    /* People to follow */
+    .follow-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); text-decoration: none; }
+    .follow-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .follow-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.1rem; color: var(--cream); flex-shrink: 0; border: 1px solid var(--border); font-weight: bold; }
+    .follow-info { text-align: right; flex: 1; min-width: 0; }
+    .follow-name { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--cream); font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .follow-uni { font-family: 'Space Mono', monospace; font-size: 0.52rem; color: var(--cream-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .follow-btn { background: none; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Space Mono', monospace; font-size: 0.5rem; padding: 4px 10px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; border-radius: 4px; font-weight: bold; flex-shrink: 0; }
+    .follow-btn:hover, .follow-btn.following { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+
+    /* TRENDING */
+    .trend-item { padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .trend-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .trend-item:hover .trend-tag { color: var(--gold-light); transform: translateX(-4px); }
+    .trend-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); letter-spacing: 0.05em; }
+    .trend-tag { font-family: 'Amiri', serif; font-size: 1.05rem; color: var(--gold); margin: 3px 0; transition: all 0.2s; font-weight: bold; }
+    .trend-count { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); }
+
+    /* Empty Explore state */
+    .explore-empty { text-align: center; padding: 40px 10px; color: var(--cream-dim); font-size: 0.9rem; }
+
+    /* BOTTOM NAV FOR MOBILE */
+    .bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+      background: rgba(10,10,8,0.95); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border); z-index: 150;
+      align-items: center; justify-content: space-around; padding: 0 8px;
+    }
+    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; color: var(--cream-dim); cursor: pointer; transition: color 0.2s; text-decoration: none; position: relative; }
+    .bottom-nav-item.active { color: var(--gold); }
+    .bottom-nav-icon { font-size: 1.3rem; }
+    .bottom-nav-label { font-family: 'Space Mono', monospace; font-size: 0.45rem; letter-spacing: 0.05em; }
+    .bottom-nav-badge { position: absolute; top: 4px; right: 6px; min-width: 16px; height: 16px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 0.42rem; color: white; padding: 0 3px; }
+    .bottom-nav-add { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 12px; cursor: pointer; background: none; border: none; }
+    .bottom-nav-add-icon { width: 36px; height: 36px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--bg); line-height: 1; transition: all 0.2s; font-weight: bold; }
+    .bottom-nav-add:hover .bottom-nav-add-icon { background: var(--gold-light); transform: scale(1.05); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg2); border: 1px solid var(--gold); color: var(--gold);
+      font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 12px 24px;
+      letter-spacing: 0.1em; z-index: 1000; opacity: 0; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      pointer-events: none; border-radius: 6px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); font-weight: bold; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="topnav-actions">
+      <a href="inbox.html" class="nav-icon-btn" title="الإشعارات">
+        🔔
+        <span class="nav-badge"></span>
+      </a>
+      <a href="chat.html" class="nav-icon-btn" title="المحادثات">💬</a>
+      <a href="profile.html" class="topnav-avatar" id="navAvatar">ط</a>
+    </div>
+    <div class="topnav-search">
+      <span class="search-icon" onclick="executeLiveFeedFilter(document.getElementById('inpTopSearch').value)">🔍</span>
+      <input type="text" id="inpTopSearch" placeholder="ابحث في محتوى المنشورات أو أسماء الزملاء..." onkeydown="if(event.key==='Enter') executeLiveFeedFilter(this.value)" oninput="executeLiveFeedFilter(this.value)" />
+    </div>
+    <a href="index.html" class="topnav-logo" title="تسجيل الدخول / الخروج">كلية</a>
+  </nav>
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-profile">
+      <a href="profile.html" class="profile-avatar-lg" id="sideAvatar">ط</a>
+      <a href="profile.html" class="profile-name" id="sideName">طالب جامعي مستجد</a>
+      <div class="profile-uni" id="sideUsername">@user</div>
+      <div class="profile-verified">✓ طالب موثق</div>
+      <div class="profile-stats">
+        <a href="profile.html" class="stat"><span class="stat-num" id="sideFollowing">0</span><span class="stat-label">متابَع</span></a>
+        <a href="profile.html" class="stat"><span class="stat-num" id="sideFollowers">0</span><span class="stat-label">متابِع</span></a>
+        <a href="profile.html" class="stat"><span class="stat-num" id="statPostCount">0</span><span class="stat-label">منشور</span></a>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="feed.html" class="sidebar-nav-item active"><span class="nav-item-icon">🏠</span><span class="nav-item-label">الرئيسية</span></a>
+      <a href="chat.html" class="sidebar-nav-item"><span class="nav-item-icon">💬</span><span class="nav-item-label">المحادثات</span></a>
+      <a href="inbox.html" class="sidebar-nav-item"><span class="nav-item-icon">🔔</span><span class="nav-item-label">الإشعارات</span></a>
+      <a href="profile.html" class="sidebar-nav-item"><span class="nav-item-icon">👤</span><span class="nav-item-label">الملف الشخصي</span></a>
+      <a href="#" class="sidebar-nav-item" onclick="KulliyaDB.showToast('قسم الاستكشاف قيد التطوير 🚀')"><span class="nav-item-icon">🔍</span><span class="nav-item-label">استكشاف</span></a>
+
+      <div class="sidebar-section-title">أدوات الحرم الجامعي</div>
+      <a href="#" class="sidebar-nav-item" onclick="KulliyaDB.showToast('المكتبة الجامعية الرقمية')"><span class="nav-item-icon">📚</span><span class="nav-item-label">المكتبة الجامعية</span></a>
+      <a href="index.html" class="sidebar-nav-item" style="color: #e05c7a;"><span class="nav-item-icon">🚪</span><span class="nav-item-label">تسجيل الخروج</span></a>
+    </nav>
+  </aside>
+
+  <!-- MAIN FEED -->
+  <main class="main-feed">
+
+    <div class="feed-tabs">
+      <div class="feed-tab active" onclick="switchTab(this)">الحرم الجامعي</div>
+      <div class="feed-tab" onclick="switchTab(this)">المتابَعون</div>
+      <div class="feed-tab" onclick="switchTab(this)">قنواتي</div>
+    </div>
+
+    <!-- POST COMPOSER — INSTAGRAM INSPIRED -->
+    <div class="composer">
+      <div class="composer-inner">
+        <div class="composer-avatar" id="compAvatar">ط</div>
+        <div class="composer-right">
+          <textarea class="composer-textarea" id="compTextarea" placeholder="شارك إعلانات، أسئلة، أو ملفات PDF مع زملائك في الحرم الجامعي..." rows="3" onkeydown="if(event.key==='Enter' && (event.ctrlKey || event.metaKey)) submitPersistentPost()"></textarea>
+          <div class="composer-footer">
+            <div class="composer-tools">
+              <button class="composer-tool" title="إضافة صورة" onclick="KulliyaDB.showToast('إرفاق صورة 🖼️')">🖼️</button>
+              <button class="composer-tool" title="إضافة ملف PDF" onclick="KulliyaDB.showToast('إرفاق ملف PDF 📎')">📎</button>
+              <button class="composer-tool" title="وسم طالب" onclick="KulliyaDB.showToast('وسم زميل @')">@</button>
+              <button class="composer-tool" title="إضافة هاشتاق" onclick="insertTag('#')">#</button>
+            </div>
+            <button class="composer-submit" onclick="submitPersistentPost()">نشر المنشور <span>↑</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POSTS CONTAINER — CLEAN PRISTINE BY DEFAULT -->
+    <div id="postsContainer">
+      <!-- Persisted custom posts dynamically loaded here -->
+    </div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar-right">
+
+    <!-- Official Channels Starter -->
+    <div class="widget">
+      <div class="widget-title">قنوات جامعية معتمدة</div>
+      <div class="channel-item">
+        <div class="channel-icon">🏛️</div>
+        <div class="channel-info">
+          <div class="channel-name">كلية الطب · الجزائر</div>
+          <div class="channel-members">رسمية معتمدة</div>
+        </div>
+        <button class="channel-join" onclick="joinChannel(this)">انضم</button>
+      </div>
+      <div class="channel-item">
+        <div class="channel-icon">💻</div>
+        <div class="channel-info">
+          <div class="channel-name">كلية الإعلام الآلي</div>
+          <div class="channel-members">قناة أكاديمية</div>
+        </div>
+        <button class="channel-join joined" onclick="joinChannel(this)">✓ منضم</button>
+      </div>
+    </div>
+
+    <!-- Pristine Tag Explore -->
+    <div class="widget">
+      <div class="widget-title">استكشاف الهاشتاقات</div>
+      <div class="explore-empty" id="exploreTagsEmpty">لا توجد هاشتاقات نشطة بعد. انشر أول هاشتاق في الصندوق أعلاه.</div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- BOTTOM NAV FOR MOBILE -->
+<nav class="bottom-nav">
+  <a href="feed.html" class="bottom-nav-item active"><span class="bottom-nav-icon">🏠</span><span class="bottom-nav-label">الرئيسية</span></a>
+  <a href="inbox.html" class="bottom-nav-item"><span class="bottom-nav-icon">🔔</span><span class="bottom-nav-label">الإشعارات</span></a>
+  <button class="bottom-nav-add" onclick="document.getElementById('compTextarea').focus()"><div class="bottom-nav-add-icon">+</div></button>
+  <a href="chat.html" class="bottom-nav-item"><span class="bottom-nav-icon">💬</span><span class="bottom-nav-label">المحادثات</span></a>
+  <a href="profile.html" class="bottom-nav-item"><span class="bottom-nav-icon">👤</span><span class="bottom-nav-label">البروفايل</span></a>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentUser = null;
+
+  window.addEventListener("DOMContentLoaded", () => {
+    currentUser = KulliyaDB.getCurrentUser();
+
+    document.getElementById("sideName").textContent = currentUser.full_name;
+    document.getElementById("sideUsername").textContent = "@" + currentUser.username;
+    document.getElementById("sideFollowing").textContent = currentUser.following_count || 0;
+    document.getElementById("sideFollowers").textContent = currentUser.followers_count || 0;
+    document.getElementById("statPostCount").textContent = currentUser.posts_count || 0;
+    
+    const initial = currentUser.full_name.charAt(0);
+    document.getElementById("navAvatar").textContent = initial;
+    document.getElementById("sideAvatar").textContent = initial;
+    document.getElementById("compAvatar").textContent = initial;
+
+    renderAllPersistedPosts();
+  });
+
+  // Top Search Live DOM Filter Engine
+  function executeLiveFeedFilter(query) {
+    const val = query.toLowerCase().trim();
+    const posts = document.querySelectorAll("#postsContainer .post");
+    posts.forEach(pEl => {
+      const textContent = pEl.textContent.toLowerCase();
+      pEl.style.display = textContent.includes(val) ? "block" : "none";
+    });
+  }
+
+  // Universal DOM dynamic posts formatter
+  function renderAllPersistedPosts() {
+    let postsList = KulliyaDB.getAllPosts();
+
+    // Check official announcement from admin.html
+    const offAnn = localStorage.getItem("kulliya_official_announcement");
+    if (offAnn && !postsList.some(p => p.content && p.content.includes(offAnn))) {
+      const offPost = {
+        id: "post-off-" + Date.now(),
+        author: "📢 الإدارة الرسمية · جامعة الجزائر",
+        username: "admin_kulliya",
+        faculty: "إعلان إداري مثبت",
+        time: "الآن مباشر",
+        content: "📌 <strong>تعميم رسمي:</strong> " + offAnn,
+        is_channel: true,
+        likes: 45,
+        comments: []
+      };
+      postsList.unshift(offPost);
+      KulliyaDB.saveAllPosts(postsList);
+    }
+
+    const myPostsCount = postsList.filter(p => p.author === currentUser.full_name).length;
+    document.getElementById("statPostCount").textContent = myPostsCount;
+    currentUser.posts_count = myPostsCount; KulliyaDB.setCurrentUser(currentUser);
+
+    const container = document.getElementById("postsContainer");
+    container.innerHTML = "";
+
+    if (postsList.length === 0) {
+      container.innerHTML = `
+        <div style="padding:100px 20px; text-align:center; color:var(--cream-dim); background:var(--bg); border-bottom:1px solid var(--border);">
+          <div style="font-size:3.8rem; margin-bottom:14px; opacity:0.3;">🎓</div>
+          <div style="font-family:'Space Mono', monospace; font-size:0.9rem; color:var(--gold); margin-bottom:8px;">أهلاً بك في شبكة كلية الأكاديمية</div>
+          <div style="font-size:0.95rem; line-height:1.7; max-width:480px; margin:0 auto;">المنصة فارغة تماماً ومستعدة لإسهاماتك. شارك أول إعلان، سؤال دراسي، أو أرفق ملفات PDF لزملائك باستخدام الصندوق أعلاه.</div>
+        </div>
+      `;
+      return;
+    }
+
+    // Dynamic Academic HashTag builder
+    const activeTags = [];
+    postsList.forEach(p => {
+      const matches = (p.content || '').match(/#[\w\u0600-\u06FF_]+/g);
+      if(matches) matches.forEach(t => { if(!activeTags.includes(t)) activeTags.push(t); });
+    });
+
+    const tagsWidget = document.getElementById("exploreTagsEmpty");
+    if (tagsWidget && activeTags.length > 0) {
+      tagsWidget.innerHTML = "";
+      activeTags.forEach(t => {
+        tagsWidget.innerHTML += `<div class="trend-item" onclick="document.getElementById('inpTopSearch').value='${t}'; executeLiveFeedFilter('${t}')"><div class="trend-tag">${t}</div><div class="trend-count">نشط مباشر</div></div>`;
+      });
+    }
+
+    postsList.forEach(p => {
+      const postEl = document.createElement("div");
+      postEl.className = "post" + (p.is_channel ? " channel-post" : "");
+      postEl.id = "elem-" + p.id;
+      
+      const init = p.is_channel ? "📢" : p.author.charAt(0);
+      const isMyPost = p.author === currentUser.full_name;
+      const deleteBtnHtml = isMyPost ? `<button class="post-more" onclick="deletePersistentPost('${p.id}', event)" title="حذف المنشور">🗑️ حذف</button>` : `<button class="post-more" onclick="KulliyaDB.showToast('خيارات المنشور')">⋯</button>`;
+
+      let pdfHtml = "";
+      if (p.has_pdf) {
+        pdfHtml = `
+          <div class="post-image" onclick="KulliyaDB.showToast('تم تحميل ملف PDF بنجاح ✓')">
+            <span class="post-image-icon">📄</span>
+            <span>${p.pdf_name || 'وثيقة_أكاديمية.pdf'}</span>
+            <span style="font-size:0.65rem; color:var(--cream-dim)">PDF Document · 2.4 MB · انقر للتحميل</span>
+          </div>
+        `;
+      }
+
+      let commsHtml = "";
+      (p.comments || []).forEach(c => {
+        commsHtml += `<div class="comment-row"><div class="comment-avatar" style="background:var(--gold-dim)">${c.name.charAt(0)}</div><div class="comment-body"><div class="comment-name">${c.name}</div><div class="comment-text">${c.text}</div></div></div>`;
+      });
+
+      postEl.innerHTML = `
+        <div class="post-header">
+          <div class="post-header-left">
+            <a href="chat.html" class="post-avatar" style="background:linear-gradient(135deg,#7a6230,#2d6e4e);">${init}</a>
+            <div>
+              <a href="chat.html" class="post-author" onclick="localStorage.setItem('targetChat','${p.author}')">${p.author} <span class="verified-badge">${p.is_channel ? 'رسمي' : '✓'}</span></a>
+              <div class="post-info">${p.faculty || 'كلية العلوم'} · ${p.time || 'الآن'}</div>
+            </div>
+          </div>
+          ${deleteBtnHtml}
+        </div>
+        <p class="post-content">${(p.content || '').replace(/\n/g, '<br/>')}</p>
+        ${pdfHtml}
+        <div class="post-actions">
+          <button class="post-action" onclick="KulliyaDB.likePost('${p.id}', this)"><span>♥</span> <b class="like-num">${p.likes || 0}</b></button>
+          <button class="post-action" onclick="toggleComments('comms-box-${p.id}')"><span>💬</span> <b class="comm-num">${(p.comments || []).length}</b> تعليق</button>
+          <button class="post-action" onclick="sharePost()"><span>↗</span> مشاركة</button>
+          <button class="post-action" onclick="savePost(this)"><span>🔖</span> حفظ</button>
+        </div>
+
+        <div class="comments-area" id="comms-box-${p.id}">
+          <div id="comms-list-${p.id}">${commsHtml}</div>
+          <div class="comment-input-row">
+            <input type="text" class="comment-input" placeholder="أضف تعليقاً..." id="inp-comm-${p.id}" onkeydown="if(event.key==='Enter') addPersistentComment('${p.id}')"/>
+            <button class="comment-send-btn" onclick="addPersistentComment('${p.id}')">إرسال</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(postEl);
+    });
+  }
+
+  async function submitPersistentPost() {
+    const ta = document.getElementById("compTextarea"); const text = ta.value.trim();
+    if (!text) { KulliyaDB.showToast("يرجى كتابة نص المنشور أولاً!"); return; }
+    ta.value = "";
+
+    await KulliyaDB.createPost({ content: text });
+    renderAllPersistedPosts();
+    KulliyaDB.showToast("✨ تم نشر إسهامك الأكاديمي بنجاح ✓");
+  }
+
+  async function deletePersistentPost(postId, event) {
+    event.stopPropagation();
+    if (!confirm("هل أنت متأكد من حذف هذا المنشور نهائياً من قاعدة المنصة؟")) return;
+
+    await KulliyaDB.deletePost(postId);
+    const elem = document.getElementById("elem-" + postId);
+    if (elem) { elem.style.opacity = "0"; setTimeout(() => elem.remove(), 300); }
+    KulliyaDB.showToast("🗑️ تم حذف المنشور نهائياً ✓");
+    renderAllPersistedPosts();
+  }
+
+  function toggleComments(boxId) { const box = document.getElementById(boxId); if(box) box.classList.toggle("open"); }
+
+  function addPersistentComment(postId) {
+    const inp = document.getElementById("inp-comm-" + postId); if(!inp || !inp.value.trim()) return;
+    const text = inp.value.trim(); inp.value = "";
+
+    const newComm = KulliyaDB.addComment(postId, text);
+    if(newComm) {
+      const listArea = document.getElementById("comms-list-" + postId);
+      if(listArea) { const cRow = document.createElement("div"); cRow.className = "comment-row"; cRow.innerHTML = `<div class="comment-avatar" style="background:linear-gradient(135deg,#7a6230,#2d6e4e)">${newComm.name.charAt(0)}</div><div class="comment-body"><div class="comment-name">${newComm.name}</div><div class="comment-text">${newComm.text}</div></div>`; listArea.appendChild(cRow); }
+      const elem = document.getElementById("elem-" + postId); if(elem) { const commNum = elem.querySelector(".comm-num"); if(commNum) commNum.textContent = parseInt(commNum.textContent) + 1; }
+    }
+  }
+
+  function savePost(btn) { btn.classList.toggle('saved'); if(btn.classList.contains('saved')) KulliyaDB.showToast('🔖 تم حفظ المنشور في المحفوظات'); else KulliyaDB.showToast('تم إزالة المنشور من المحفوظات'); }
+  function sharePost() { KulliyaDB.showToast('↗ تم نسخ رابط المنشور بنجاح ✓'); }
+  function followUser(btn) { if (btn.classList.contains('following')) { btn.classList.remove('following'); btn.textContent = 'تابع'; KulliyaDB.showToast('تم إلغاء المتابعة'); } else { btn.classList.add('following'); btn.textContent = '✓ تتابعه'; KulliyaDB.showToast('✓ تمت المتابعة بنجاح'); } }
+  function joinChannel(btn) { if (btn.classList.contains('joined')) { btn.classList.remove('joined'); btn.textContent = 'انضم'; KulliyaDB.showToast('غادرت القناة'); } else { btn.classList.add('joined'); btn.textContent = '✓ منضم'; KulliyaDB.showToast('✓ انضممت إلى القناة بنجاح'); } }
+  function insertTag(t) { const ta = document.getElementById('compTextarea'); ta.value += ' ' + t; ta.focus(); }
+  function switchTab(tab) { document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); KulliyaDB.showToast('✓ تم تحديث ' + tab.textContent.trim()); }
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0ab62922ad12820',t:'MTc4MTI5MzgzMg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
