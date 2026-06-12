@@ -550,45 +550,28 @@
   </div>
 </div>
 
-<script>
-  function goStep2() {
-    const carte = document.getElementById('carteInput').value.trim();
-    const bac = document.getElementById('bacInput').value.trim();
-    const err = document.getElementById('err1');
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // Basic validation — real check would be server-side
-    if (carte.length < 6 || bac.length < 4) {
-      err.classList.add('show');
-      return;
-    }
-    err.classList.remove('show');
+const supabase = createClient(
+'https://bcvcfnefyqheuhawagdr.supabase.co',
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdmNmbmVmeXFoZXVoYXdhZ2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjk4MTAsImV4cCI6MjA5Njg0NTgxMH0.2MwsmSKQ3jOHP2n833hynQp4pngT8LCXDLNmxzrNrPU'
+);
 
-    document.getElementById('step1').classList.remove('active');
-    document.getElementById('step2').classList.add('active');
+window.goStep2 = function() {
+  const carte = document.getElementById('carteInput').value.trim();
+  const bac = document.getElementById('bacInput').value.trim();
+
+  if(carte.length < 6 || bac.length < 4){
+    document.getElementById('err1').classList.add('show');
+    return;
   }
 
-  function finish() {
-    const name = document.getElementById('nameInput').value.trim();
-    const username = document.getElementById('usernameInput').value.trim();
-    const pass = document.getElementById('passInput').value;
-    const confirm = document.getElementById('confirmInput').value;
-    const err = document.getElementById('err2');
+  document.getElementById('err1').classList.remove('show');
 
-    if (!name || !username || pass.length < 8) {
-      err.textContent = 'أكمل جميع الحقول (كلمة السر 8 أحرف على الأقل)';
-      err.classList.add('show');
-      return;
-    }
-    if (pass !== confirm) {
-      err.textContent = 'كلمتا السر غير متطابقتين';
-      err.classList.add('show');
-      return;
-    }
-    err.classList.remove('show');
-
-    // Redirect to feed
-    window.location.href = 'feed.html';
-  }
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+};
 </script>
 </body>
 </html>
