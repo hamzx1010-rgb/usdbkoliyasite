@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — لوحة الإدارة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #080806;
+      --bg2: #0c0c09;
+      --bg3: #11110e;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #7a6230;
+      --gold-faint: rgba(201,168,76,0.07);
+      --cream: #f5f0e8;
+      --cream-dim: #9a9488;
+      --border: rgba(201,168,76,0.1);
+      --red: #c94c4c;
+      --red-faint: rgba(201,76,76,0.08);
+      --green: #4ca87a;
+      --green-faint: rgba(76,168,122,0.08);
+      --blue: #4c7ac9;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Amiri', serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ADMIN SIDEBAR */
+    .admin-sidebar {
+      width: 240px;
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; right: 0;
+      height: 100vh;
+      z-index: 100;
+    }
+    .admin-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-logo-text {
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(201,168,76,0.3);
+      display: block;
+    }
+    .admin-logo-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .admin-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+    .admin-nav::-webkit-scrollbar { width: 0; }
+    .admin-nav-section {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.52rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 12px 24px 6px;
+    }
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 24px;
+      color: var(--cream-dim);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-right: 3px solid transparent;
+      text-decoration: none;
+    }
+    .admin-nav-item:hover { color: var(--cream); background: var(--gold-faint); }
+    .admin-nav-item.active { color: var(--gold); border-right-color: var(--gold); background: var(--gold-faint); }
+    .admin-nav-icon { width: 20px; text-align: center; font-size: 1rem; }
+    .admin-nav-badge {
+      margin-right: auto;
+      background: var(--red);
+      color: white;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    .admin-nav-badge.gold { background: var(--gold); color: var(--bg); }
+
+    .admin-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .admin-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--bg);
+      font-size: 0.8rem;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+    .admin-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.05em;
+    }
+    .admin-role {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.1em;
+    }
+
+    /* MAIN CONTENT */
+    .admin-main {
+      margin-right: 240px;
+      flex: 1;
+      min-height: 100vh;
+      padding: 32px;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+    }
+    .page-title {
+      font-family: 'Scheherazade New', serif;
+      font-size: 2rem;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+    .page-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.1em;
+    }
+    .page-actions { display: flex; gap: 12px; }
+    .btn {
+      padding: 10px 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      text-transform: uppercase;
+    }
+    .btn-gold { background: var(--gold); color: var(--bg); }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--cream-dim); }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-red { background: var(--red); color: white; }
+    .btn-red:hover { opacity: 0.85; }
+    .btn-green { background: var(--green); color: var(--bg); }
+    .btn-green:hover { opacity: 0.85; }
+    .btn-sm { padding: 6px 12px; font-size: 0.55rem; }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 24px;
+      transition: border-color 0.3s;
+    }
+    .stat-card:hover { border-color: var(--gold-dim); }
+    .stat-card-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .stat-card-num {
+      font-family: 'Scheherazade New', serif;
+      font-size: 2.4rem;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-card-change {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.05em;
+    }
+    .stat-card-change.up { color: var(--green); }
+    .stat-card-change.down { color: var(--red); }
+    .stat-card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* SECTION */
+    .section {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .section-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-title-sm {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* TABLE */
+    .table { width: 100%; border-collapse: collapse; }
+    .table th {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      background: rgba(201,168,76,0.03);
+    }
+    .table td {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+      vertical-align: middle;
+    }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background: var(--gold-faint); }
+
+    /* STATUS BADGES */
+    .badge {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.52rem;
+      padding: 3px 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .badge-verified { background: var(--green-faint); color: var(--green); border: 1px solid rgba(76,168,122,0.3); }
+    .badge-pending { background: rgba(201,168,76,0.08); color: var(--gold); border: 1px solid rgba(201,168,76,0.25); }
+    .badge-rejected { background: var(--red-faint); color: var(--red); border: 1px solid rgba(201,76,76,0.25); }
+    .badge-banned { background: rgba(80,40,40,0.5); color: #ff6b6b; border: 1px solid rgba(201,76,76,0.4); }
+
+    /* USER ROW */
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-cell-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Scheherazade New', serif;
+      font-size: 1rem;
+      color: var(--cream);
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .user-cell-name {
+      font-family: 'Amiri', serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+    }
+    .user-cell-email {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.52rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.02em;
+    }
+
+    .action-group { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .tab {
+      padding: 14px 24px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--cream-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .tab:hover { color: var(--cream); }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* SEARCH BAR */
+    .search-bar {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+    }
+    .search-input {
+      flex: 1;
+      background: var(--gold-faint);
+      border: 1px solid var(--border);
+      color: var(--cream);
+      padding: 9px 14px;
+      font-family: 'Amiri', serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.3s;
+      text-align: right;
+    }
+    .search-input:focus { border-color: var(--gold); }
+    .search-input::placeholder { color: var(--cream-dim); opacity: 0.4; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,8,6,0.9);
+      z-index: 500;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(8px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2);
+      border: 1px solid rgba(201,168,76,0.25);
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+      animation: modalIn 0.3s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(16px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-title {
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.5rem;
+      color: var(--cream);
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.08em;
+      margin-bottom: 28px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; left: 16px;
+      background: none; border: none;
+      color: var(--cream-dim); font-size: 1rem;
+      cursor: pointer; transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--gold); }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      background: var(--gold-faint);
+      border: 1px solid var(--border);
+      color: var(--cream);
+      padding: 10px 14px;
+      font-family: 'Amiri', serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s;
+      text-align: right;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--gold); }
+    .form-select { cursor: pointer; }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-start; margin-top: 24px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg2);
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 12px 24px;
+      letter-spacing: 0.1em;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* PANEL PAGES */
+    .panel-page { display: none; }
+    .panel-page.active { display: block; }
+
+    /* GRAIN */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.2;
+    }
+
+    /* REPORT CARD */
+    .report-card {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .report-card:hover { background: var(--gold-faint); }
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .report-type {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--red);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .report-time {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--cream-dim);
+    }
+    .report-content {
+      font-size: 0.9rem;
+      color: var(--cream-dim);
+      line-height: 1.6;
+      margin-bottom: 12px;
+      text-align: right;
+    }
+    .report-reporter {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--cream-dim);
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .admin-sidebar { width: 200px; }
+      .admin-main { margin-right: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ADMIN SIDEBAR -->
+<aside class="admin-sidebar">
+  <div class="admin-logo">
+    <span class="admin-logo-text">كلية</span>
+    <span class="admin-logo-label">لوحة الإدارة</span>
+  </div>
+
+  <nav class="admin-nav">
+    <div class="admin-nav-section">الرئيسية</div>
+    <a class="admin-nav-item active" onclick="showPage('dashboard', this)">
+      <span class="admin-nav-icon">📊</span> لوحة التحكم
+    </a>
+
+    <div class="admin-nav-section">المستخدمون</div>
+    <a class="admin-nav-item" onclick="showPage('pending', this)">
+      <span class="admin-nav-icon">⏳</span> طلبات التوثيق
+      <span class="admin-nav-badge">8</span>
+    </a>
+    <a class="admin-nav-item" onclick="showPage('users', this)">
+      <span class="admin-nav-icon">👥</span> جميع الطلاب
+    </a>
+    <a class="admin-nav-item" onclick="showPage('passwords', this)">
+      <span class="admin-nav-icon">🔑</span> إعادة كلمة المرور
+      <span class="admin-nav-badge gold">3</span>
+    </a>
+
+    <div class="admin-nav-section">المحتوى</div>
+    <a class="admin-nav-item" onclick="showPage('reports', this)">
+      <span class="admin-nav-icon">🚨</span> البلاغات
+      <span class="admin-nav-badge">5</span>
+    </a>
+    <a class="admin-nav-item" onclick="showPage('posts', this)">
+      <span class="admin-nav-icon">📝</span> المنشورات
+    </a>
+    <a class="admin-nav-item" onclick="showPage('channels', this)">
+      <span class="admin-nav-icon">📢</span> القنوات
+    </a>
+
+    <div class="admin-nav-section">النظام</div>
+    <a class="admin-nav-item" href="feed.html">
+      <span class="admin-nav-icon">🌐</span> عرض المنصة
+    </a>
+    <a class="admin-nav-item" onclick="showPage('settings', this)">
+      <span class="admin-nav-icon">⚙️</span> الإعدادات
+    </a>
+  </nav>
+
+  <div class="admin-footer">
+    <div class="admin-user">
+      <div class="admin-avatar">AD</div>
+      <div>
+        <div class="admin-name">المشرف الرئيسي</div>
+        <div class="admin-role">SUPER ADMIN</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="admin-main">
+
+  <!-- DASHBOARD -->
+  <div class="panel-page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title">لوحة التحكم</div>
+        <div class="page-sub">الاثنين، 20 أبريل 2026 · آخر تحديث: الآن</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-outline">📥 تصدير البيانات</button>
+        <button class="btn btn-gold">🔄 تحديث</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-card-icon">👥</span>
+        <div class="stat-card-label">إجمالي الطلاب</div>
+        <div class="stat-card-num">4,821</div>
+        <div class="stat-card-change up">↑ +127 هذا الأسبوع</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-icon">✅</span>
+        <div class="stat-card-label">حسابات موثقة</div>
+        <div class="stat-card-num">4,204</div>
+        <div class="stat-card-change up">↑ 87% من الإجمالي</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-icon">📝</span>
+        <div class="stat-card-label">منشورات اليوم</div>
+        <div class="stat-card-num">342</div>
+        <div class="stat-card-change up">↑ +23% عن أمس</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-icon">🚨</span>
+        <div class="stat-card-label">بلاغات معلقة</div>
+        <div class="stat-card-num">5</div>
+        <div class="stat-card-change down">↑ تحتاج مراجعة</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <!-- Recent signups -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title-sm">آخر التسجيلات</div>
+          <button class="btn btn-outline btn-sm" onclick="showPage('users', document.querySelector('[onclick*=users]'))">عرض الكل</button>
+        </div>
+        <table class="table">
+          <tr>
+            <th>الطالب</th>
+            <th>الجامعة</th>
+            <th>الحالة</th>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-cell-avatar" style="background:linear-gradient(135deg,#3a2a1a,#6e4e2d);">أ</div>
+                <div>
+                  <div class="user-cell-name">أمينة بن عمر</div>
+                  <div class="user-cell-email">منذ 12 دقيقة</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">USTHB</td>
+            <td><span class="badge badge-pending">معلق</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-cell-avatar" style="background:linear-gradient(135deg,#1a2a3a,#2d4e6e);">ي</div>
+                <div>
+                  <div class="user-cell-name">يوسف مزيان</div>
+                  <div class="user-cell-email">منذ 45 دقيقة</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Univ. Oran</td>
+            <td><span class="badge badge-verified">موثق</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-cell-avatar" style="background:linear-gradient(135deg,#2a1a3a,#4e2d6e);">س</div>
+                <div>
+                  <div class="user-cell-name">سارة حمدي</div>
+                  <div class="user-cell-email">منذ ساعة</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Constantine</td>
+            <td><span class="badge badge-verified">موثق</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Pending verifications -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title-sm">طلبات توثيق عاجلة</div>
+          <button class="btn btn-outline btn-sm" onclick="showPage('pending', document.querySelector('[onclick*=pending]'))">عرض الكل</button>
+        </div>
+        <table class="table">
+          <tr>
+            <th>الطالب</th>
+            <th>الجامعة</th>
+            <th>إجراء</th>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-cell-avatar" style="background:linear-gradient(135deg,#3a2a1a,#6e4e2d);">أ</div>
+                <div>
+                  <div class="user-cell-name">أمينة بن عمر</div>
+                  <div class="user-cell-email">أرسلت البطاقة</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">USTHB · معلوماتية</td>
+            <td>
+              <div class="action-group">
+                <button class="btn btn-green btn-sm" onclick="verifyUser(this)">✓</button>
+                <button class="btn btn-red btn-sm" onclick="rejectUser(this)">✕</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-cell-avatar" style="background:linear-gradient(135deg,#1a3a2a,#2d6e4e);">ن</div>
+                <div>
+                  <div class="user-cell-name">نور الهدى قاسمي</div>
+                  <div class="user-cell-email">أرسلت البطاقة</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">USTHB · رياضيات</td>
+            <td>
+              <div class="action-group">
+                <button class="btn btn-green btn-sm" onclick="verifyUser(this)">✓</button>
+                <button class="btn btn-red btn-sm" onclick="rejectUser(this)">✕</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-cell-avatar" style="background:linear-gradient(135deg,#3a1a1a,#6e2d2d);">ر</div>
+                <div>
+                  <div class="user-cell-name">رضا بوزيد</div>
+                  <div class="user-cell-email">أرسل البطاقة</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Univ. Alger · طب</td>
+            <td>
+              <div class="action-group">
+                <button class="btn btn-green btn-sm" onclick="verifyUser(this)">✓</button>
+                <button class="btn btn-red btn-sm" onclick="rejectUser(this)">✕</button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PENDING VERIFICATIONS -->
+  <div class="panel-page" id="page-pending">
+    <div class="page-header">
+      <div>
+        <div class="page-title">طلبات التوثيق</div>
+        <div class="page-sub">8 طلب بانتظار المراجعة</div>
+      </div>
+      <button class="btn btn-gold" onclick="approveAll()">✓ قبول الكل</button>
+    </div>
+    <div class="section">
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="ابحث عن طالب..."/>
+        <button class="btn btn-outline">🔍</button>
+      </div>
+      <table class="table">
+        <tr>
+          <th>الطالب</th>
+          <th>الجامعة</th>
+          <th>التخصص</th>
+          <th>تاريخ التسجيل</th>
+          <th>البطاقة</th>
+          <th>إجراء</th>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#3a2a1a,#6e4e2d);">أ</div><div><div class="user-cell-name">أمينة بن عمر</div><div class="user-cell-email">aminab@usthb.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">USTHB</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">هندسة المعلوماتية</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">20/04/2026</td>
+          <td><button class="btn btn-outline btn-sm">👁️ عرض</button></td>
+          <td><div class="action-group"><button class="btn btn-green btn-sm" onclick="verifyUser(this)">✓ قبول</button><button class="btn btn-red btn-sm" onclick="rejectUser(this)">✕ رفض</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#1a3a2a,#2d6e4e);">ن</div><div><div class="user-cell-name">نور الهدى قاسمي</div><div class="user-cell-email">nour.q@usthb.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">USTHB</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">رياضيات</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">20/04/2026</td>
+          <td><button class="btn btn-outline btn-sm">👁️ عرض</button></td>
+          <td><div class="action-group"><button class="btn btn-green btn-sm" onclick="verifyUser(this)">✓ قبول</button><button class="btn btn-red btn-sm" onclick="rejectUser(this)">✕ رفض</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#3a1a1a,#6e2d2d);">ر</div><div><div class="user-cell-name">رضا بوزيد</div><div class="user-cell-email">rida.b@univ-alger.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Univ. Alger</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">طب</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">19/04/2026</td>
+          <td><button class="btn btn-outline btn-sm">👁️ عرض</button></td>
+          <td><div class="action-group"><button class="btn btn-green btn-sm" onclick="verifyUser(this)">✓ قبول</button><button class="btn btn-red btn-sm" onclick="rejectUser(this)">✕ رفض</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#2a1a3a,#4e2d6e);">ل</div><div><div class="user-cell-name">لينة خالد</div><div class="user-cell-email">lina.k@univ-oran.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Univ. Oran</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">قانون</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">19/04/2026</td>
+          <td><button class="btn btn-outline btn-sm">👁️ عرض</button></td>
+          <td><div class="action-group"><button class="btn btn-green btn-sm" onclick="verifyUser(this)">✓ قبول</button><button class="btn btn-red btn-sm" onclick="rejectUser(this)">✕ رفض</button></div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ALL USERS -->
+  <div class="panel-page" id="page-users">
+    <div class="page-header">
+      <div>
+        <div class="page-title">جميع الطلاب</div>
+        <div class="page-sub">4,821 طالب مسجل</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="tabs">
+        <div class="tab active">الكل (4,821)</div>
+        <div class="tab">موثق (4,204)</div>
+        <div class="tab">معلق (608)</div>
+        <div class="tab">محظور (9)</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="ابحث باسم الطالب أو الإيميل أو الجامعة..."/>
+        <button class="btn btn-outline">🔍</button>
+      </div>
+      <table class="table">
+        <tr>
+          <th>الطالب</th>
+          <th>الجامعة</th>
+          <th>التخصص</th>
+          <th>الحالة</th>
+          <th>تاريخ الانضمام</th>
+          <th>إجراء</th>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#3a2a1a,#6e4e2d);">أ</div><div><div class="user-cell-name">أمينة بن عمر</div><div class="user-cell-email">aminab@usthb.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">USTHB</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">هندسة المعلوماتية</td>
+          <td><span class="badge badge-verified">موثق</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">15/01/2026</td>
+          <td><div class="action-group"><button class="btn btn-outline btn-sm" onclick="openResetModal('أمينة بن عمر')">🔑</button><button class="btn btn-red btn-sm" onclick="banUser(this)">🚫</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#1a2a3a,#2d4e6e);">ي</div><div><div class="user-cell-name">يوسف مزيان</div><div class="user-cell-email">youcef.m@univ-oran.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Univ. Oran</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">قانون</td>
+          <td><span class="badge badge-verified">موثق</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">10/01/2026</td>
+          <td><div class="action-group"><button class="btn btn-outline btn-sm" onclick="openResetModal('يوسف مزيان')">🔑</button><button class="btn btn-red btn-sm" onclick="banUser(this)">🚫</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#2a1a3a,#4e2d6e);">س</div><div><div class="user-cell-name">سارة حمدي</div><div class="user-cell-email">sara.h@univ-constantine.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Constantine</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">طب</td>
+          <td><span class="badge badge-verified">موثق</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">08/01/2026</td>
+          <td><div class="action-group"><button class="btn btn-outline btn-sm" onclick="openResetModal('سارة حمدي')">🔑</button><button class="btn btn-red btn-sm" onclick="banUser(this)">🚫</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#1a3a1a,#2d6e2d);">ك</div><div><div class="user-cell-name">كريم عيساوي</div><div class="user-cell-email">karim.a@enpo.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">ENPO</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">هندسة مدنية</td>
+          <td><span class="badge badge-verified">موثق</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">03/01/2026</td>
+          <td><div class="action-group"><button class="btn btn-outline btn-sm" onclick="openResetModal('كريم عيساوي')">🔑</button><button class="btn btn-red btn-sm" onclick="banUser(this)">🚫</button></div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- RESET PASSWORDS -->
+  <div class="panel-page" id="page-passwords">
+    <div class="page-header">
+      <div>
+        <div class="page-title">إعادة كلمة المرور</div>
+        <div class="page-sub">3 طلبات معلقة</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title-sm">طلبات إعادة التعيين</div>
+      </div>
+      <table class="table">
+        <tr>
+          <th>الطالب</th>
+          <th>الجامعة</th>
+          <th>تاريخ الطلب</th>
+          <th>السبب</th>
+          <th>إجراء</th>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#3a2a1a,#6e4e2d);">م</div><div><div class="user-cell-name">محمد بن سالم</div><div class="user-cell-email">m.bensalem@usthb.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">USTHB</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ ساعة</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">نسيت كلمة المرور</td>
+          <td><div class="action-group"><button class="btn btn-gold btn-sm" onclick="resetPassword(this, 'محمد بن سالم')">🔑 إعادة تعيين</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#1a2a3a,#2d4e6e);">ه</div><div><div class="user-cell-name">هاجر مسعود</div><div class="user-cell-email">hajar.m@univ-alger.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">Univ. Alger</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ 3 ساعات</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">تغيير الجهاز</td>
+          <td><div class="action-group"><button class="btn btn-gold btn-sm" onclick="resetPassword(this, 'هاجر مسعود')">🔑 إعادة تعيين</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="user-cell-avatar" style="background:linear-gradient(135deg,#2a3a1a,#4e6e2d);">ع</div><div><div class="user-cell-name">عبد الرحمن زروق</div><div class="user-cell-email">abdou.z@enp.dz</div></div></div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--cream-dim);">ENP</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ يوم</td>
+          <td style="font-size:0.85rem;color:var(--cream-dim);">مشكلة تسجيل دخول</td>
+          <td><div class="action-group"><button class="btn btn-gold btn-sm" onclick="resetPassword(this, 'عبد الرحمن زروق')">🔑 إعادة تعيين</button></div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="panel-page" id="page-reports">
+    <div class="page-header">
+      <div>
+        <div class="page-title">البلاغات</div>
+        <div class="page-sub">5 بلاغات تحتاج مراجعة</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">🚨 محتوى غير لائق</div>
+          <div class="report-time">منذ 30 دقيقة</div>
+        </div>
+        <p class="report-content">"هذا المنشور يحتوي على كلام مسيء وغير أكاديمي لا علاقة له بالدراسة..."</p>
+        <div class="report-reporter">بلّغ عنه: أمينة بن عمر · منشور: #post_4821</div>
+        <div class="action-group" style="justify-content:flex-start;">
+          <button class="btn btn-outline btn-sm">👁️ عرض المنشور</button>
+          <button class="btn btn-red btn-sm" onclick="deletePost(this)">🗑️ حذف المنشور</button>
+          <button class="btn btn-outline btn-sm" onclick="dismissReport(this)">تجاهل</button>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">🚨 حساب مزيف</div>
+          <div class="report-time">منذ ساعتين</div>
+        </div>
+        <p class="report-content">"هذا الحساب لا يبدو أنه لطالب حقيقي، الصورة مأخوذة من الإنترنت والمعلومات غير دقيقة..."</p>
+        <div class="report-reporter">بلّغ عنه: يوسف مزيان · حساب: @user_3902</div>
+        <div class="action-group" style="justify-content:flex-start;">
+          <button class="btn btn-outline btn-sm">👁️ عرض الحساب</button>
+          <button class="btn btn-red btn-sm" onclick="banUser(this)">🚫 حظر الحساب</button>
+          <button class="btn btn-outline btn-sm" onclick="dismissReport(this)">تجاهل</button>
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="report-header">
+          <div class="report-type">🚨 محتوى خارج الموضوع</div>
+          <div class="report-time">منذ 4 ساعات</div>
+        </div>
+        <p class="report-content">"المنشور لا علاقة له بالدراسة أو الجامعة، إعلان تجاري..."</p>
+        <div class="report-reporter">بلّغ عنه: سارة حمدي · منشور: #post_4756</div>
+        <div class="action-group" style="justify-content:flex-start;">
+          <button class="btn btn-outline btn-sm">👁️ عرض المنشور</button>
+          <button class="btn btn-red btn-sm" onclick="deletePost(this)">🗑️ حذف المنشور</button>
+          <button class="btn btn-outline btn-sm" onclick="dismissReport(this)">تجاهل</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POSTS PAGE -->
+  <div class="panel-page" id="page-posts">
+    <div class="page-header">
+      <div>
+        <div class="page-title">إدارة المنشورات</div>
+        <div class="page-sub">342 منشور اليوم</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="search-bar">
+        <input class="search-input" type="text" placeholder="ابحث في المنشورات..."/>
+        <button class="btn btn-outline">🔍</button>
+      </div>
+      <table class="table">
+        <tr><th>المنشور</th><th>الكاتب</th><th>الوقت</th><th>تفاعل</th><th>إجراء</th></tr>
+        <tr>
+          <td style="max-width:280px;font-size:0.85rem;color:var(--cream-dim);">ملخص كامل لمقياس الخوارزميات — الفصل الثالث...</td>
+          <td><div class="user-cell-name" style="font-size:0.85rem;">أمينة بن عمر</div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ 3 ساعات</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--gold-dim);">♥ 142 · 💬 38</td>
+          <td><div class="action-group"><button class="btn btn-red btn-sm" onclick="deletePost(this)">🗑️ حذف</button></div></td>
+        </tr>
+        <tr>
+          <td style="max-width:280px;font-size:0.85rem;color:var(--cream-dim);">سؤال للطلاب القانون هل عندكم مراجع جيدة...</td>
+          <td><div class="user-cell-name" style="font-size:0.85rem;">يوسف مزيان</div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ 5 ساعات</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--gold-dim);">♥ 23 · 💬 47</td>
+          <td><div class="action-group"><button class="btn btn-red btn-sm" onclick="deletePost(this)">🗑️ حذف</button></div></td>
+        </tr>
+        <tr>
+          <td style="max-width:280px;font-size:0.85rem;color:var(--cream-dim);">خبر رائع لطلاب الطب! وزارة التعليم العالي أعلنت...</td>
+          <td><div class="user-cell-name" style="font-size:0.85rem;">سارة حمدي</div></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ 7 ساعات</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--gold-dim);">♥ 567 · 💬 203</td>
+          <td><div class="action-group"><button class="btn btn-red btn-sm" onclick="deletePost(this)">🗑️ حذف</button></div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- CHANNELS PAGE -->
+  <div class="panel-page" id="page-channels">
+    <div class="page-header">
+      <div>
+        <div class="page-title">إدارة القنوات</div>
+        <div class="page-sub">24 قناة نشطة</div>
+      </div>
+      <button class="btn btn-gold">+ قناة جديدة</button>
+    </div>
+    <div class="section">
+      <table class="table">
+        <tr><th>القناة</th><th>النوع</th><th>الأعضاء</th><th>آخر نشاط</th><th>إجراء</th></tr>
+        <tr>
+          <td><div class="user-cell"><div class="channel-icon" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:var(--gold-faint);border:1px solid var(--border);">🏛️</div><div><div class="user-cell-name">كلية الطب · جامعة الجزائر</div><div class="user-cell-email">قناة رسمية</div></div></div></td>
+          <td><span class="badge badge-verified">رسمية</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--gold);">8,421</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ ساعتين</td>
+          <td><div class="action-group"><button class="btn btn-outline btn-sm">✏️ تعديل</button><button class="btn btn-red btn-sm" onclick="showToast('تم حذف القناة')">🗑️</button></div></td>
+        </tr>
+        <tr>
+          <td><div class="user-cell"><div class="channel-icon" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:var(--gold-faint);border:1px solid var(--border);">💻</div><div><div class="user-cell-name">طلاب الإعلام الآلي</div><div class="user-cell-email">مجموعة طلابية</div></div></div></td>
+          <td><span class="badge badge-pending">طلابية</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--gold);">3,210</td>
+          <td style="font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--cream-dim);">منذ 30 دقيقة</td>
+          <td><div class="action-group"><button class="btn btn-outline btn-sm">✏️ تعديل</button><button class="btn btn-red btn-sm" onclick="showToast('تم حذف القناة')">🗑️</button></div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel-page" id="page-settings">
+    <div class="page-header">
+      <div><div class="page-title">إعدادات المنصة</div><div class="page-sub">إدارة إعدادات كلية</div></div>
+    </div>
+    <div class="section" style="padding:32px;">
+      <div style="max-width:500px;">
+        <div class="form-group">
+          <label class="form-label">اسم المنصة</label>
+          <input type="text" class="form-input" value="كلية"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني للإدارة</label>
+          <input type="email" class="form-input" value="admin@kulliya.dz"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">نمط التوثيق</label>
+          <select class="form-select">
+            <option>بطاقة طلابية + إيميل جامعي</option>
+            <option>إيميل جامعي فقط</option>
+            <option>بطاقة طلابية فقط</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">تغيير كلمة مرور المشرف</label>
+          <input type="password" class="form-input" placeholder="كلمة المرور الجديدة"/>
+        </div>
+        <button class="btn btn-gold" onclick="showToast('تم حفظ الإعدادات ✓')" style="margin-top:8px;">حفظ التغييرات</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- RESET PASSWORD MODAL -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeResetModal()">✕</button>
+    <div class="modal-title">إعادة تعيين كلمة المرور</div>
+    <div class="modal-sub" id="resetModalSub">للطالب: —</div>
+    <div class="form-group">
+      <label class="form-label">كلمة المرور الجديدة</label>
+      <input type="text" class="form-input" id="newPasswordInput" placeholder="أدخل كلمة مرور جديدة..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">أو</label>
+      <button class="btn btn-outline" style="width:100%;" onclick="generatePassword()">🎲 توليد كلمة مرور تلقائية</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" onclick="confirmReset()">✓ تأكيد إعادة التعيين</button>
+      <button class="btn btn-outline" onclick="closeResetModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // Page navigation
+  function showPage(name, el) {
+    document.querySelectorAll('.panel-page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.admin-nav-item').forEach(i => i.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  // Toast notification
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Verify user
+  function verifyUser(btn) {
+    const row = btn.closest('tr');
+    const name = row.querySelector('.user-cell-name')?.textContent || 'الطالب';
+    row.style.opacity = '0.4';
+    setTimeout(() => row.remove(), 400);
+    showToast('✓ تم توثيق ' + name);
+  }
+
+  // Reject user
+  function rejectUser(btn) {
+    const row = btn.closest('tr');
+    const name = row.querySelector('.user-cell-name')?.textContent || 'الطالب';
+    row.style.opacity = '0.4';
+    setTimeout(() => row.remove(), 400);
+    showToast('✕ تم رفض ' + name);
+  }
+
+  // Ban user
+  function banUser(btn) {
+    if (!confirm('هل أنت متأكد من حظر هذا الحساب؟')) return;
+    const row = btn.closest('tr');
+    const card = btn.closest('.report-card');
+    if (row) { row.style.opacity = '0.4'; setTimeout(() => row.remove(), 400); }
+    if (card) { card.style.opacity = '0.4'; setTimeout(() => card.remove(), 400); }
+    showToast('🚫 تم حظر الحساب');
+  }
+
+  // Delete post
+  function deletePost(btn) {
+    if (!confirm('هل أنت متأكد من حذف هذا المنشور؟')) return;
+    const row = btn.closest('tr');
+    const card = btn.closest('.report-card');
+    if (row) { row.style.opacity = '0.4'; setTimeout(() => row.remove(), 400); }
+    if (card) { card.style.opacity = '0.4'; setTimeout(() => card.remove(), 400); }
+    showToast('🗑️ تم حذف المنشور');
+  }
+
+  // Dismiss report
+  function dismissReport(btn) {
+    const card = btn.closest('.report-card');
+    card.style.opacity = '0.4';
+    setTimeout(() => card.remove(), 400);
+    showToast('تم تجاهل البلاغ');
+  }
+
+  // Approve all
+  function approveAll() {
+    if (!confirm('هل تريد قبول جميع طلبات التوثيق؟')) return;
+    document.querySelectorAll('#page-pending .table tr:not(:first-child)').forEach(row => {
+      row.style.opacity = '0.4';
+      setTimeout(() => row.remove(), 400);
+    });
+    showToast('✓ تم قبول جميع الطلبات');
+  }
+
+  // Reset password modal
+  function openResetModal(name) {
+    document.getElementById('resetModalSub').textContent = 'للطالب: ' + name;
+    document.getElementById('newPasswordInput').value = '';
+    document.getElementById('resetModal').classList.add('open');
+  }
+  function closeResetModal() {
+    document.getElementById('resetModal').classList.remove('open');
+  }
+  function generatePassword() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#';
+    let pass = '';
+    for (let i = 0; i < 10; i++) pass += chars[Math.floor(Math.random() * chars.length)];
+    document.getElementById('newPasswordInput').value = pass;
+  }
+  function confirmReset() {
+    const pass = document.getElementById('newPasswordInput').value;
+    if (!pass) { showToast('أدخل كلمة مرور أولاً'); return; }
+    closeResetModal();
+    showToast('🔑 تم إعادة تعيين كلمة المرور');
+  }
+  function resetPassword(btn, name) {
+    openResetModal(name);
+  }
+
+  // Close modal on overlay click
+  document.getElementById('resetModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('resetModal')) closeResetModal();
+  });
+
+  // Tab switching (visual only)
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

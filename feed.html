@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — الرئيسية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --bg2: #0e0e0b;
+      --bg3: #131310;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #7a6230;
+      --gold-faint: rgba(201,168,76,0.08);
+      --cream: #f5f0e8;
+      --cream-dim: #9a9488;
+      --border: rgba(201,168,76,0.12);
+      --green: #1a3a2a;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Amiri', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.25;
+    }
+
+    /* LAYOUT */
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      grid-template-rows: 60px 1fr;
+      min-height: 100vh;
+    }
+
+    /* TOP NAV */
+    .topnav {
+      grid-column: 1 / -1;
+      background: rgba(10,10,8,0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topnav-logo {
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(201,168,76,0.3);
+      text-decoration: none;
+    }
+    .topnav-search {
+      flex: 1;
+      max-width: 360px;
+      margin: 0 32px;
+      position: relative;
+    }
+    .topnav-search input {
+      width: 100%;
+      background: var(--gold-faint);
+      border: 1px solid var(--border);
+      color: var(--cream);
+      padding: 8px 16px 8px 40px;
+      font-family: 'Amiri', serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s;
+      border-radius: 2px;
+      text-align: right;
+    }
+    .topnav-search input:focus { border-color: var(--gold); }
+    .topnav-search input::placeholder { color: var(--cream-dim); opacity: 0.5; }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold-dim);
+      font-size: 0.8rem;
+    }
+    .topnav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .nav-icon-btn {
+      background: none;
+      border: none;
+      color: var(--cream-dim);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 6px;
+      transition: color 0.2s;
+      position: relative;
+    }
+    .nav-icon-btn:hover { color: var(--gold); }
+    .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 8px;
+      height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+    .topnav-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dim), #2d6e4e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Scheherazade New', serif;
+      font-size: 1rem;
+      color: var(--cream);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .topnav-avatar:hover { border-color: var(--gold); }
+
+    /* LEFT SIDEBAR */
+    .sidebar-left {
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+    .sidebar-left::-webkit-scrollbar { width: 0; }
+
+    .sidebar-profile {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .profile-avatar-lg {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dim), #2d6e4e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.5rem;
+      color: var(--cream);
+      margin: 0 auto 12px;
+      border: 2px solid var(--gold-dim);
+    }
+    .profile-name {
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.1rem;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+    .profile-uni {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.05em;
+    }
+    .profile-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      padding: 3px 8px;
+      margin-top: 8px;
+      letter-spacing: 0.1em;
+    }
+    .profile-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 16px;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--gold);
+      display: block;
+    }
+    .stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .sidebar-nav {
+      padding: 16px 0;
+    }
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 24px;
+      color: var(--cream-dim);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-right: 3px solid transparent;
+      text-decoration: none;
+    }
+    .sidebar-nav-item:hover {
+      color: var(--cream);
+      background: var(--gold-faint);
+    }
+    .sidebar-nav-item.active {
+      color: var(--gold);
+      border-right-color: var(--gold);
+      background: var(--gold-faint);
+    }
+    .nav-item-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+    .nav-item-label { font-family: 'Amiri', serif; font-size: 1rem; }
+    .nav-item-count {
+      margin-right: auto;
+      margin-left: 0;
+      background: var(--gold);
+      color: var(--bg);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    .sidebar-section-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 16px 24px 8px;
+    }
+
+    /* MAIN FEED */
+    .main-feed {
+      border-right: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      min-height: calc(100vh - 60px);
+    }
+
+    .feed-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,8,0.8);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 60px;
+      z-index: 50;
+    }
+    .feed-tab {
+      flex: 1;
+      padding: 16px;
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--cream-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .feed-tab:hover { color: var(--cream); }
+    .feed-tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* POST COMPOSER */
+    .composer {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .composer-inner {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .composer-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dim), #2d6e4e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.1rem;
+      color: var(--cream);
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .composer-right { flex: 1; }
+    .composer-textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--cream);
+      font-family: 'Amiri', serif;
+      font-size: 1.05rem;
+      resize: none;
+      outline: none;
+      min-height: 60px;
+      text-align: right;
+      line-height: 1.6;
+    }
+    .composer-textarea::placeholder { color: var(--cream-dim); opacity: 0.4; }
+    .composer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .composer-tools {
+      display: flex;
+      gap: 16px;
+    }
+    .composer-tool {
+      background: none;
+      border: none;
+      color: var(--gold-dim);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 4px;
+    }
+    .composer-tool:hover { color: var(--gold); }
+    .composer-submit {
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 8px 24px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .composer-submit:hover {
+      background: var(--gold-light);
+      transform: translateY(-1px);
+    }
+
+    /* POSTS */
+    .post {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .post:hover { background: rgba(201,168,76,0.02); }
+
+    .post-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .post-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.1rem;
+      color: var(--cream);
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .post-meta { flex: 1; text-align: right; }
+    .post-author {
+      font-family: 'Scheherazade New', serif;
+      font-size: 1.05rem;
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .verified-badge {
+      background: var(--gold);
+      color: var(--bg);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      padding: 1px 5px;
+      letter-spacing: 0.05em;
+    }
+    .post-info {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--cream-dim);
+      margin-top: 3px;
+      letter-spacing: 0.03em;
+    }
+    .post-more {
+      background: none;
+      border: none;
+      color: var(--cream-dim);
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 1rem;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+    .post-more:hover { color: var(--gold); }
+
+    .post-content {
+      font-size: 1rem;
+      color: var(--cream);
+      line-height: 1.75;
+      text-align: right;
+      margin-bottom: 16px;
+    }
+    .post-content .tag {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .post-image {
+      width: 100%;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+      background: var(--bg3);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-dim);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .post-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      color: var(--cream-dim);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      padding: 6px 10px;
+      transition: all 0.2s;
+      border-radius: 2px;
+    }
+    .post-action:hover { color: var(--gold); background: var(--gold-faint); }
+    .post-action.liked { color: #e05c7a; }
+    .post-action span { font-size: 1rem; }
+
+    /* CHANNEL POST */
+    .post.channel-post {
+      border-right: 3px solid var(--gold);
+    }
+
+    /* RIGHT SIDEBAR */
+    .sidebar-right {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 24px 20px;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+    .sidebar-right::-webkit-scrollbar { width: 0; }
+
+    .widget {
+      margin-bottom: 28px;
+    }
+    .widget-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Channels widget */
+    .channel-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .channel-item:hover .channel-name { color: var(--gold); }
+    .channel-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gold-faint);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .channel-info { text-align: right; flex: 1; }
+    .channel-name {
+      font-family: 'Amiri', serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+      transition: color 0.2s;
+    }
+    .channel-members {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.05em;
+    }
+    .channel-join {
+      background: none;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-dim);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+    .channel-join:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-faint);
+    }
+    .channel-join.joined {
+      background: var(--gold);
+      color: var(--bg);
+      border-color: var(--gold);
+    }
+
+    /* People to follow */
+    .follow-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .follow-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Scheherazade New', serif;
+      font-size: 1rem;
+      color: var(--cream);
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+    .follow-info { text-align: right; flex: 1; }
+    .follow-name {
+      font-family: 'Amiri', serif;
+      font-size: 0.9rem;
+      color: var(--cream);
+    }
+    .follow-uni {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.52rem;
+      color: var(--cream-dim);
+    }
+    .follow-btn {
+      background: none;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold-dim);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.5rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.05em;
+    }
+    .follow-btn:hover, .follow-btn.following {
+      background: var(--gold);
+      color: var(--bg);
+      border-color: var(--gold);
+    }
+
+    /* TRENDING */
+    .trend-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .trend-item:hover .trend-tag { color: var(--gold-light); }
+    .trend-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.05em;
+    }
+    .trend-tag {
+      font-family: 'Amiri', serif;
+      font-size: 1rem;
+      color: var(--gold);
+      margin: 2px 0;
+      transition: color 0.2s;
+    }
+    .trend-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--cream-dim);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .post { animation: fadeIn 0.4s ease both; }
+    .post:nth-child(1) { animation-delay: 0.05s; }
+    .post:nth-child(2) { animation-delay: 0.1s; }
+    .post:nth-child(3) { animation-delay: 0.15s; }
+    .post:nth-child(4) { animation-delay: 0.2s; }
+    .post:nth-child(5) { animation-delay: 0.25s; }
+
+    /* Loading pulse */
+    .loading-bar {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      display: none;
+    }
+    .loading-bar.active { display: block; }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    @media (max-width: 1024px) {
+      .app { grid-template-columns: 220px 1fr; }
+      .sidebar-right { display: none; }
+    }
+    @media (max-width: 768px) {
+      .app { grid-template-columns: 1fr; grid-template-rows: 60px auto 1fr; }
+      .sidebar-left { display: none; }
+      .topnav-search { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="topnav-actions">
+      <button class="nav-icon-btn" title="إشعارات">
+        🔔
+        <span class="nav-badge"></span>
+      </button>
+      <button class="nav-icon-btn" title="الرسائل">💬</button>
+      <div class="topnav-avatar">م</div>
+    </div>
+    <div class="topnav-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="ابحث عن طلاب، قنوات، مواضيع..." />
+    </div>
+    <a href="index.html" class="topnav-logo">كلية</a>
+  </nav>
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div class="sidebar-profile">
+      <div class="profile-avatar-lg">م</div>
+      <div class="profile-name">محمد بن يوسف</div>
+      <div class="profile-uni">USTHB · هندسة المعلوماتية · س3</div>
+      <div class="profile-verified">✓ موثق</div>
+      <div class="profile-stats">
+        <div class="stat">
+          <span class="stat-num">128</span>
+          <span class="stat-label">متابَع</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">94</span>
+          <span class="stat-label">متابِع</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">47</span>
+          <span class="stat-label">منشور</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="feed.html" class="sidebar-nav-item active">
+        <span class="nav-item-icon">🏠</span>
+        <span class="nav-item-label">الرئيسية</span>
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <span class="nav-item-icon">📢</span>
+        <span class="nav-item-label">القنوات</span>
+        <span class="nav-item-count">3</span>
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <span class="nav-item-icon">💬</span>
+        <span class="nav-item-label">الرسائل</span>
+        <span class="nav-item-count">7</span>
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <span class="nav-item-icon">🔔</span>
+        <span class="nav-item-label">الإشعارات</span>
+        <span class="nav-item-count">12</span>
+      </a>
+      <a href="profile.html" class="sidebar-nav-item">
+        <span class="nav-item-icon">👤</span>
+        <span class="nav-item-label">ملفي الشخصي</span>
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <span class="nav-item-icon">🔍</span>
+        <span class="nav-item-label">استكشاف</span>
+      </a>
+
+      <div class="sidebar-section-title">أدوات الدراسة</div>
+      <a href="#" class="sidebar-nav-item">
+        <span class="nav-item-icon">📚</span>
+        <span class="nav-item-label">الملفات المشتركة</span>
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <span class="nav-item-icon">📅</span>
+        <span class="nav-item-label">جدول الامتحانات</span>
+      </a>
+      <a href="#" class="sidebar-nav-item">
+        <span class="nav-item-icon">⚙️</span>
+        <span class="nav-item-label">الإعدادات</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- MAIN FEED -->
+  <main class="main-feed">
+    <div class="loading-bar" id="loadingBar"></div>
+
+    <div class="feed-tabs">
+      <div class="feed-tab active" onclick="switchTab(this)">للجميع</div>
+      <div class="feed-tab" onclick="switchTab(this)">متابَعون</div>
+      <div class="feed-tab" onclick="switchTab(this)">جامعتي</div>
+      <div class="feed-tab" onclick="switchTab(this)">قنواتي</div>
+    </div>
+
+    <!-- COMPOSER -->
+    <div class="composer">
+      <div class="composer-inner">
+        <div class="composer-avatar">م</div>
+        <div class="composer-right">
+          <textarea class="composer-textarea" placeholder="شارك ملاحظة، سؤالاً، أو خبراً أكاديمياً..." rows="3"></textarea>
+          <div class="composer-footer">
+            <div class="composer-tools">
+              <button class="composer-tool" title="إضافة صورة">🖼️</button>
+              <button class="composer-tool" title="إضافة ملف">📎</button>
+              <button class="composer-tool" title="وسم طالب">@</button>
+              <button class="composer-tool" title="إضافة هاشتاق">#</button>
+            </div>
+            <button class="composer-submit" onclick="submitPost()">نشر</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POSTS -->
+    <div id="postsContainer">
+
+      <!-- Channel post -->
+      <div class="post channel-post">
+        <div class="post-header">
+          <button class="post-more">⋯</button>
+          <div class="post-meta">
+            <div class="post-author">
+              📢 قناة كلية الطب · جامعة الجزائر
+              <span class="verified-badge">رسمي</span>
+            </div>
+            <div class="post-info">قناة رسمية · منذ ساعتين</div>
+          </div>
+          <div class="post-avatar" style="background: linear-gradient(135deg, #1a3a2a, #2d6e4e); border-radius: 4px;">📢</div>
+        </div>
+        <p class="post-content">
+          📅 <strong>إعلان هام:</strong> امتحانات الفصل الثاني ستبدأ يوم <span class="tag">#15_مايو</span>. الجدول الكامل لجميع التخصصات متاح الآن على المنصة. تأكدوا من مراجعة مواعيد كل مقياس. حظاً موفقاً للجميع! 🎓
+        </p>
+        <div class="post-actions">
+          <button class="post-action" onclick="likePost(this)"><span>♥</span> 891</button>
+          <button class="post-action"><span>💬</span> 124 تعليق</button>
+          <button class="post-action"><span>↗</span> مشاركة</button>
+          <button class="post-action"><span>🔖</span> حفظ</button>
+        </div>
+      </div>
+
+      <!-- Regular post -->
+      <div class="post">
+        <div class="post-header">
+          <button class="post-more">⋯</button>
+          <div class="post-meta">
+            <div class="post-author">
+              أمينة بن عمر
+              <span class="verified-badge">✓</span>
+            </div>
+            <div class="post-info">USTHB · هندسة المعلوماتية · منذ 3 ساعات</div>
+          </div>
+          <div class="post-avatar" style="background: linear-gradient(135deg, #3a2a1a, #6e4e2d);">أ</div>
+        </div>
+        <p class="post-content">
+          ملخص كامل لمقياس الخوارزميات — الفصل الثالث 📚<br/>
+          شاملة كل التمارين المحلولة من الأستاذ بن علي + أسئلة الامتحانات القديمة من 2019 إلى 2024.<br/>
+          <span class="tag">#خوارزميات</span> <span class="tag">#USTHB</span> <span class="tag">#هندسة_المعلوماتية</span>
+        </p>
+        <div class="post-image">📄 ملف PDF · خوارزميات_ملخص_س3.pdf · 2.4 MB</div>
+        <div class="post-actions">
+          <button class="post-action liked" onclick="likePost(this)"><span>♥</span> 142</button>
+          <button class="post-action"><span>💬</span> 38 تعليق</button>
+          <button class="post-action"><span>↗</span> مشاركة</button>
+          <button class="post-action"><span>🔖</span> حفظ</button>
+        </div>
+      </div>
+
+      <!-- Post with question -->
+      <div class="post">
+        <div class="post-header">
+          <button class="post-more">⋯</button>
+          <div class="post-meta">
+            <div class="post-author">
+              يوسف مزيان
+              <span class="verified-badge">✓</span>
+            </div>
+            <div class="post-info">Université d'Oran · Droit · منذ 5 ساعات</div>
+          </div>
+          <div class="post-avatar" style="background: linear-gradient(135deg, #1a2a3a, #2d4e6e);">ي</div>
+        </div>
+        <p class="post-content">
+          سؤال للطلاب القانون 🙏<br/>
+          هل عندكم مراجع جيدة للقانون التجاري الجزائري؟ نحتاج للمقارنة مع القانون الفرنسي في بحث التخرج. الأستاذ طلب مصادر أكاديمية وليس مواقع عشوائية.<br/>
+          <span class="tag">#القانون</span> <span class="tag">#بحث_التخرج</span>
+        </p>
+        <div class="post-actions">
+          <button class="post-action" onclick="likePost(this)"><span>♥</span> 23</button>
+          <button class="post-action"><span>💬</span> 47 تعليق</button>
+          <button class="post-action"><span>↗</span> مشاركة</button>
+          <button class="post-action"><span>🔖</span> حفظ</button>
+        </div>
+      </div>
+
+      <!-- News post -->
+      <div class="post">
+        <div class="post-header">
+          <button class="post-more">⋯</button>
+          <div class="post-meta">
+            <div class="post-author">
+              سارة حمدي
+              <span class="verified-badge">✓</span>
+            </div>
+            <div class="post-info">Université Constantine · Médecine · منذ 7 ساعات</div>
+          </div>
+          <div class="post-avatar" style="background: linear-gradient(135deg, #2a1a3a, #4e2d6e);">س</div>
+        </div>
+        <p class="post-content">
+          خبر رائع لطلاب الطب! 🎉<br/>
+          وزارة التعليم العالي أعلنت عن فتح منح دراسية للدكتوراه في فرنسا وكندا لسنة 2025. التسجيل مفتوح حتى نهاية الشهر. سأشارك الرابط الرسمي فور نشره.<br/>
+          <span class="tag">#منح_دراسية</span> <span class="tag">#دكتوراه</span> <span class="tag">#طب</span>
+        </p>
+        <div class="post-actions">
+          <button class="post-action" onclick="likePost(this)"><span>♥</span> 567</button>
+          <button class="post-action"><span>💬</span> 203 تعليق</button>
+          <button class="post-action"><span>↗</span> مشاركة</button>
+          <button class="post-action"><span>🔖</span> حفظ</button>
+        </div>
+      </div>
+
+      <!-- Study tip post -->
+      <div class="post">
+        <div class="post-header">
+          <button class="post-more">⋯</button>
+          <div class="post-meta">
+            <div class="post-author">
+              كريم عيساوي
+              <span class="verified-badge">✓</span>
+            </div>
+            <div class="post-info">ENPO · Génie Civil · منذ 9 ساعات</div>
+          </div>
+          <div class="post-avatar" style="background: linear-gradient(135deg, #1a3a1a, #2d6e2d);">ك</div>
+        </div>
+        <p class="post-content">
+          نصيحة من تجربة شخصية للمقبلين على الامتحانات 💡<br/>
+          توقفوا عن الدراسة 48 ساعة قبل الامتحان الكبير. مخك يحتاج للراحة لتثبيت المعلومات. اقرأوا ملاحظاتكم القصيرة فقط. النوم الجيد يساوي 3 ليالي سهر. جربتها وغيرت نتائجي تماماً.<br/>
+          <span class="tag">#نصائح_دراسية</span> <span class="tag">#امتحانات</span>
+        </p>
+        <div class="post-actions">
+          <button class="post-action" onclick="likePost(this)"><span>♥</span> 1.2k</button>
+          <button class="post-action"><span>💬</span> 88 تعليق</button>
+          <button class="post-action"><span>↗</span> مشاركة</button>
+          <button class="post-action"><span>🔖</span> حفظ</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar-right">
+
+    <!-- Trending -->
+    <div class="widget">
+      <div class="widget-title">الأكثر تداولاً</div>
+      <div class="trend-item">
+        <div class="trend-label">مواضيع دراسية</div>
+        <div class="trend-tag">#امتحانات_2025</div>
+        <div class="trend-count">2,341 منشور</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-label">أخبار جامعية</div>
+        <div class="trend-tag">#منح_دراسية</div>
+        <div class="trend-count">1,890 منشور</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-label">مساعدة دراسية</div>
+        <div class="trend-tag">#خوارزميات</div>
+        <div class="trend-count">934 منشور</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-label">نصائح</div>
+        <div class="trend-tag">#نصائح_دراسية</div>
+        <div class="trend-count">756 منشور</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-label">جامعة</div>
+        <div class="trend-tag">#USTHB</div>
+        <div class="trend-count">612 منشور</div>
+      </div>
+    </div>
+
+    <!-- Channels -->
+    <div class="widget">
+      <div class="widget-title">قنوات مقترحة</div>
+      <div class="channel-item">
+        <div class="channel-icon">🏛️</div>
+        <div class="channel-info">
+          <div class="channel-name">كلية الطب · الجزائر</div>
+          <div class="channel-members">8,421 عضو · رسمية</div>
+        </div>
+        <button class="channel-join" onclick="joinChannel(this)">انضم</button>
+      </div>
+      <div class="channel-item">
+        <div class="channel-icon">💻</div>
+        <div class="channel-info">
+          <div class="channel-name">طلاب الإعلام الآلي</div>
+          <div class="channel-members">3,210 عضو</div>
+        </div>
+        <button class="channel-join joined" onclick="joinChannel(this)">✓ منضم</button>
+      </div>
+      <div class="channel-item">
+        <div class="channel-icon">⚖️</div>
+        <div class="channel-info">
+          <div class="channel-name">قانون وعلوم سياسية</div>
+          <div class="channel-members">2,890 عضو</div>
+        </div>
+        <button class="channel-join" onclick="joinChannel(this)">انضم</button>
+      </div>
+      <div class="channel-item">
+        <div class="channel-icon">🔬</div>
+        <div class="channel-info">
+          <div class="channel-name">علوم وتكنولوجيا</div>
+          <div class="channel-members">1,654 عضو</div>
+        </div>
+        <button class="channel-join" onclick="joinChannel(this)">انضم</button>
+      </div>
+    </div>
+
+    <!-- People to follow -->
+    <div class="widget">
+      <div class="widget-title">طلاب قد تعرفهم</div>
+      <div class="follow-item">
+        <div class="follow-avatar" style="background: linear-gradient(135deg, #3a2a1a, #6e4e2d);">ن</div>
+        <div class="follow-info">
+          <div class="follow-name">نور الهدى قاسمي</div>
+          <div class="follow-uni">USTHB · هندسة المعلوماتية</div>
+        </div>
+        <button class="follow-btn" onclick="followUser(this)">تابع</button>
+      </div>
+      <div class="follow-item">
+        <div class="follow-avatar" style="background: linear-gradient(135deg, #1a2a3a, #2d4e6e);">ر</div>
+        <div class="follow-info">
+          <div class="follow-name">رضا بوزيد</div>
+          <div class="follow-uni">USTHB · رياضيات</div>
+        </div>
+        <button class="follow-btn" onclick="followUser(this)">تابع</button>
+      </div>
+      <div class="follow-item">
+        <div class="follow-avatar" style="background: linear-gradient(135deg, #2a1a3a, #4e2d6e);">ل</div>
+        <div class="follow-info">
+          <div class="follow-name">لينة خالد</div>
+          <div class="follow-uni">Univ. Alger · Droit</div>
+        </div>
+        <button class="follow-btn" onclick="followUser(this)">تابع</button>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+  // Like toggle
+  function likePost(btn) {
+    const count = btn.querySelector('span').nextSibling;
+    btn.classList.toggle('liked');
+    // just visual for now
+  }
+
+  // Follow toggle
+  function followUser(btn) {
+    if (btn.classList.contains('following')) {
+      btn.classList.remove('following');
+      btn.textContent = 'تابع';
+    } else {
+      btn.classList.add('following');
+      btn.textContent = '✓ تتابعه';
+    }
+  }
+
+  // Join channel toggle
+  function joinChannel(btn) {
+    if (btn.classList.contains('joined')) {
+      btn.classList.remove('joined');
+      btn.textContent = 'انضم';
+    } else {
+      btn.classList.add('joined');
+      btn.textContent = '✓ منضم';
+    }
+  }
+
+  // Tab switch
+  function switchTab(tab) {
+    document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const bar = document.getElementById('loadingBar');
+    bar.classList.add('active');
+    setTimeout(() => bar.classList.remove('active'), 800);
+  }
+
+  // Post submit
+  function submitPost() {
+    const ta = document.querySelector('.composer-textarea');
+    if (!ta.value.trim()) return;
+    const content = ta.value.trim();
+    ta.value = '';
+
+    const bar = document.getElementById('loadingBar');
+    bar.classList.add('active');
+    setTimeout(() => {
+      bar.classList.remove('active');
+      const newPost = document.createElement('div');
+      newPost.className = 'post';
+      newPost.style.animationDelay = '0s';
+      newPost.innerHTML = `
+        <div class="post-header">
+          <button class="post-more">⋯</button>
+          <div class="post-meta">
+            <div class="post-author">محمد بن يوسف <span class="verified-badge">✓</span></div>
+            <div class="post-info">USTHB · هندسة المعلوماتية · الآن</div>
+          </div>
+          <div class="post-avatar" style="background: linear-gradient(135deg, #7a6230, #2d6e4e);">م</div>
+        </div>
+        <p class="post-content">${content}</p>
+        <div class="post-actions">
+          <button class="post-action" onclick="likePost(this)"><span>♥</span> 0</button>
+          <button class="post-action"><span>💬</span> 0 تعليق</button>
+          <button class="post-action"><span>↗</span> مشاركة</button>
+          <button class="post-action"><span>🔖</span> حفظ</button>
+        </div>
+      `;
+      const container = document.getElementById('postsContainer');
+      container.insertBefore(newPost, container.firstChild);
+    }, 600);
+  }
+</script>
+</body>
+</html>
