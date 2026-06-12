@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — الملف الشخصي الأكاديمي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --bg2: #0e0e0b;
+      --bg3: #131310;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #7a6230;
+      --gold-faint: rgba(201,168,76,0.08);
+      --cream: #f5f0e8;
+      --cream-dim: #9a9488;
+      --border: rgba(201,168,76,0.12);
+      --red: #e05c7a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Amiri', 'Times New Roman', serif;
+      min-height: 100vh;
+      margin: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.25;
+    }
+
+    /* TOP NAV */
+    .topnav {
+      background: rgba(10,10,8,0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      height: 58px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topnav-back {
+      background: none; border: none;
+      color: var(--cream-dim); font-size: 1.2rem;
+      cursor: pointer; padding: 6px;
+      transition: color 0.2s; text-decoration: none; font-weight: bold;
+    }
+    .topnav-back:hover { color: var(--gold); }
+    .topnav-username {
+      font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--cream); letter-spacing: 0.05em; font-weight: bold;
+    }
+    .topnav-more {
+      background: none; border: none; color: var(--cream-dim); font-size: 1.3rem; cursor: pointer; padding: 6px; transition: color 0.2s;
+    }
+    .topnav-more:hover { color: var(--gold); }
+
+    /* PROFILE WRAPPER */
+    .profile-page {
+      max-width: 640px; margin: 0 auto; padding-bottom: 80px; animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* PROFILE HEADER */
+    .profile-header { padding: 28px 20px 16px; }
+    .profile-top-row { display: flex; align-items: center; gap: 28px; margin-bottom: 16px; }
+
+    .profile-avatar-wrap { position: relative; flex-shrink: 0; }
+    .profile-avatar {
+      width: 92px; height: 92px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-dim), #2d6e4e);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Scheherazade New', 'Amiri', serif; font-size: 2.6rem;
+      color: var(--cream); border: 2px solid var(--gold); font-weight: bold; box-shadow: 0 4px 20px rgba(0,0,0,0.6); user-select: none;
+    }
+
+    /* Instagram-style stats row */
+    .profile-stats-row { display: flex; flex: 1; justify-content: space-around; text-align: center; }
+    .p-stat { cursor: pointer; transition: transform 0.2s; }
+    .p-stat:hover { transform: translateY(-2px); }
+    .p-stat-num { font-family: 'Space Mono', monospace; font-size: 1.15rem; color: var(--cream); font-weight: 700; display: block; }
+    .p-stat-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); letter-spacing: 0.05em; display: block; margin-top: 4px; font-weight: bold; }
+
+    /* Bio section */
+    .profile-bio-section { padding: 0 20px 20px; }
+    .profile-fullname { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.35rem; color: var(--cream); font-weight: 700; margin-bottom: 2px; }
+    .profile-handle { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--gold-light); letter-spacing: 0.05em; margin-bottom: 10px; font-weight: bold; }
+    .profile-verified-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(201,168,76,0.12); border: 1px solid var(--gold); color: var(--gold); font-family: 'Space Mono', monospace; font-size: 0.55rem; padding: 3px 10px; margin-bottom: 14px; letter-spacing: 0.1em; border-radius: 4px; font-weight: bold; }
+    .profile-bio { font-family: 'Amiri', serif; font-size: 1.05rem; color: var(--cream); line-height: 1.7; text-align: right; margin-bottom: 12px; }
+    .profile-bio-meta { font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--cream-dim); letter-spacing: 0.03em; line-height: 2; }
+    .profile-bio-meta span { color: var(--gold); margin-left: 4px; }
+
+    /* Action buttons */
+    .profile-actions { display: flex; gap: 12px; padding: 0 20px 24px; }
+    .btn-edit { flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--cream); padding: 12px; font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; border-radius: 4px; font-weight: bold; }
+    .btn-edit:hover { border-color: var(--gold); color: var(--bg); background: var(--gold); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+    .btn-edit:active { transform: translateY(1px); box-shadow: none; }
+    
+    .btn-share { background: var(--bg3); border: 1px solid var(--border); color: var(--cream); padding: 12px 20px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
+    .btn-share:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); }
+
+    /* Highlights / Story bubbles */
+    .highlights-row { display: flex; gap: 16px; padding: 0 20px 24px; overflow-x: auto; }
+    .highlights-row::-webkit-scrollbar { display: none; }
+    .highlight-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0; transition: transform 0.2s; }
+    .highlight-item:hover { transform: scale(1.05); }
+    .highlight-circle { width: 64px; height: 64px; border-radius: 50%; background: var(--bg3); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .highlight-item:hover .highlight-circle { border-color: var(--gold); background: #181815; }
+    .highlight-label { font-family: 'Space Mono', monospace; font-size: 0.5rem; color: var(--cream-dim); letter-spacing: 0.05em; text-align: center; font-weight: bold; }
+    .highlight-add .highlight-circle { font-size: 1.6rem; color: var(--gold); border-color: rgba(201,168,76,0.3); background: var(--gold-faint); }
+
+    /* POSTS TABS */
+    .profile-tabs { display: flex; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); position: sticky; top: 58px; background: rgba(10,10,8,0.95); backdrop-filter: blur(12px); z-index: 50; }
+    .profile-tab { flex: 1; padding: 16px; text-align: center; font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--cream-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; user-select: none; }
+    .profile-tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: bold; background: var(--gold-faint); }
+    .profile-tab:hover { color: var(--cream); }
+
+    /* POSTS GRID */
+    .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+    .grid-post { aspect-ratio: 1; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: all 0.2s; }
+    .grid-post:hover { transform: scale(0.98); border-color: var(--gold); z-index: 2; box-shadow: 0 0 20px rgba(201,168,76,0.2); }
+    .grid-post-icon { font-size: 2.2rem; opacity: 0.4; transition: opacity 0.2s; }
+    .grid-post:hover .grid-post-icon { opacity: 0.8; }
+    .grid-post-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: white; font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; opacity: 0; transition: all 0.2s; }
+    .grid-post:hover .grid-post-overlay { background: rgba(10,10,8,0.85); opacity: 1; backdrop-filter: blur(4px); }
+    .grid-post-text { padding: 12px; font-family: 'Amiri', serif; font-size: 0.85rem; color: var(--cream-dim); line-height: 1.5; text-align: right; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* Edit profile modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 300; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .edit-modal { background: var(--bg2); border: 1px solid var(--border); border-bottom: none; width: 100%; max-width: 640px; border-radius: 16px 16px 0 0; padding: 20px 28px 48px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); box-shadow: 0 -10px 50px rgba(0,0,0,0.8); text-align: right; }
+    .modal-overlay.show .edit-modal { transform: translateY(0); }
+    .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    .modal-title { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 24px; font-weight: bold; }
+    .edit-field { margin-bottom: 18px; }
+    .edit-field label { display: block; font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--gold-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
+    .edit-field input, .edit-field textarea, .edit-field select { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--cream); padding: 12px 16px; font-family: 'Amiri', serif; font-size: 1.05rem; outline: none; transition: all 0.2s; text-align: right; resize: none; border-radius: 4px; }
+    .edit-field input:focus, .edit-field textarea:focus, .edit-field select:focus { border-color: var(--gold); background: var(--gold-faint); }
+    .modal-save { width: 100%; background: var(--gold); color: var(--bg); border: none; padding: 14px; font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; cursor: pointer; transition: all 0.2s; text-transform: uppercase; margin-top: 12px; border-radius: 4px; font-weight: bold; }
+    .modal-save:hover { background: var(--gold-light); box-shadow: 0 4px 20px rgba(201,168,76,0.4); }
+    .modal-save:active { transform: translateY(1px); box-shadow: none; }
+
+    /* BOTTOM NAV */
+    .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: rgba(10,10,8,0.95); backdrop-filter: blur(16px); border-top: 1px solid var(--border); z-index: 150; align-items: center; justify-content: space-around; padding: 0 8px; }
+    .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; color: var(--cream-dim); cursor: pointer; transition: color 0.2s; text-decoration: none; position: relative; }
+    .bottom-nav-item.active { color: var(--gold); font-weight: bold; }
+    .bottom-nav-icon { font-size: 1.3rem; }
+    .bottom-nav-label { font-family: 'Space Mono', monospace; font-size: 0.45rem; letter-spacing: 0.05em; }
+    .bottom-nav-badge { position: absolute; top: 4px; right: 6px; min-width: 16px; height: 16px; background: var(--red); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 0.42rem; color: white; padding: 0 3px; }
+    .bottom-nav-add { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 12px; cursor: pointer; background: none; border: none; }
+    .bottom-nav-add-icon { width: 36px; height: 36px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--bg); font-weight: bold; line-height: 1; transition: all 0.2s; }
+    .bottom-nav-add:hover .bottom-nav-add-icon { background: var(--gold-light); transform: scale(1.05); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg2); border: 1px solid var(--gold); color: var(--gold);
+      font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 12px 24px;
+      letter-spacing: 0.1em; z-index: 1000; opacity: 0; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      pointer-events: none; border-radius: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); font-weight: bold; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a href="feed.html" class="topnav-back" title="العودة للرئيسية">←</a>
+  <div class="topnav-username" id="navUsername">@mohamed_dz</div>
+  <button class="topnav-more" onclick="openEdit()" title="المزيد">⋯</button>
+</nav>
+
+<div class="profile-page">
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <div class="profile-top-row">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="avatarInitial">م</div>
+      </div>
+      <div class="profile-stats-row">
+        <div class="p-stat" onclick="switchTab(document.querySelector('.profile-tab'), 'grid')">
+          <span class="p-stat-num" id="statPostCount">47</span>
+          <span class="p-stat-label">منشور</span>
+        </div>
+        <div class="p-stat" onclick="showToast('قائمة الطلاب الذين تتابعهم (128)')">
+          <span class="p-stat-num">128</span>
+          <span class="p-stat-label">متابَع</span>
+        </div>
+        <div class="p-stat" onclick="showToast('قائمة متابعيك (94)')">
+          <span class="p-stat-num">94</span>
+          <span class="p-stat-label">متابِع</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIO -->
+  <div class="profile-bio-section">
+    <div class="profile-fullname" id="profileName">محمد بن يوسف</div>
+    <div class="profile-handle" id="profileHandle">@mohamed_dz</div>
+    <div class="profile-verified-tag">✓ طالب جامعي موثق</div>
+    <div class="profile-bio" id="profileBio">
+      طالب ماستر في هندسة المعلوماتية 💻<br/>
+      USTHB · كلية الإعلام الآلي<br/>
+      مهتم بالذكاء الاصطناعي، الخوارزميات، وتطوير الويب
+    </div>
+    <div class="profile-bio-meta" id="profileMeta">
+      <span>🏛️</span> جامعة العلوم والتكنولوجيا هواري بومدين USTHB<br/>
+      <span>📍</span> الجزائر العاصمة
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="profile-actions">
+    <button class="btn-edit" onclick="openEdit()">تعديل الملف الشخصي ✏️</button>
+    <button class="btn-share" onclick="shareProfile()" title="مشاركة الملف الشخصي">↗ مشاركة</button>
+  </div>
+
+  <!-- HIGHLIGHTS -->
+  <div class="highlights-row">
+    <div class="highlight-item highlight-add" onclick="openEdit()">
+      <div class="highlight-circle">+</div>
+      <div class="highlight-label">تعديل</div>
+    </div>
+    <div class="highlight-item" onclick="showToast('عرض الهايلايت: دروس 📚')">
+      <div class="highlight-circle">📚</div>
+      <div class="highlight-label">دروس</div>
+    </div>
+    <div class="highlight-item" onclick="showToast('عرض الهايلايت: مشاريع 💻')">
+      <div class="highlight-circle">💻</div>
+      <div class="highlight-label">مشاريع</div>
+    </div>
+    <div class="highlight-item" onclick="showToast('عرض الهايلايت: ملخصات 📝')">
+      <div class="highlight-circle">📝</div>
+      <div class="highlight-label">ملخصات</div>
+    </div>
+    <div class="highlight-item" onclick="showToast('عرض الهايلايت: إنجازات 🏆')">
+      <div class="highlight-circle">🏆</div>
+      <div class="highlight-label">إنجازات</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="profile-tabs">
+    <div class="profile-tab active" onclick="switchTab(this, 'grid')">⊞ منشورات</div>
+    <div class="profile-tab" onclick="switchTab(this, 'saved')">🔖 محفوظ</div>
+    <div class="profile-tab" onclick="switchTab(this, 'tagged')">🏷️ موسوم</div>
+  </div>
+
+  <!-- POSTS GRID -->
+  <div class="posts-grid" id="postsGrid">
+    <div class="grid-post" onclick="openPostDetail('ملخص كامل لمقياس الخوارزميات — الفصل الثالث 📚 شاملة كل التمارين المحلولة')">
+      <div class="grid-post-text">ملخص كامل لمقياس الخوارزميات — الفصل الثالث 📚 شاملة كل التمارين المحلولة</div>
+      <div class="grid-post-overlay"><span>♥ 142</span><span>💬 38</span></div>
+    </div>
+    <div class="grid-post" onclick="openPostDetail('ملف PDF: خوارزميات_س3.pdf')">
+      <div class="grid-post-icon">📄</div>
+      <div class="grid-post-overlay"><span>♥ 89</span><span>💬 12</span></div>
+    </div>
+    <div class="grid-post" onclick="openPostDetail('سؤال للطلاب: هل عندكم مراجع جيدة للذكاء الاصطناعي؟')">
+      <div class="grid-post-text">سؤال للطلاب: هل عندكم مراجع جيدة للذكاء الاصطناعي والتعلم العميق؟</div>
+      <div class="grid-post-overlay"><span>♥ 23</span><span>💬 47</span></div>
+    </div>
+    <div class="grid-post" onclick="openPostDetail('مشروع البرمجة الموزعة')">
+      <div class="grid-post-icon">💻</div>
+      <div class="grid-post-overlay"><span>♥ 67</span><span>💬 9</span></div>
+    </div>
+    <div class="grid-post" onclick="openPostDetail('نتائج بحث التخرج جاهزة الحمد لله 🎉')">
+      <div class="grid-post-text">نتائج بحث التخرج جاهزة الحمد لله 🎉 تم التسليم بنجاح</div>
+      <div class="grid-post-overlay"><span>♥ 201</span><span>💬 54</span></div>
+    </div>
+    <div class="grid-post" onclick="openPostDetail('جدول المناقشات النهائية')">
+      <div class="grid-post-icon">📅</div>
+      <div class="grid-post-overlay"><span>♥ 34</span><span>💬 7</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editOverlay" onclick="handleEditOverlay(event)">
+  <div class="edit-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">تعديل الملف الشخصي الأكاديمي</div>
+    <div class="edit-field">
+      <label>الاسم الكامل</label>
+      <input type="text" id="editName" value="محمد بن يوسف" />
+    </div>
+    <div class="edit-field">
+      <label>اسم المستخدم (بدون @)</label>
+      <input type="text" id="editUsername" value="mohamed_dz" />
+    </div>
+    <div class="edit-field">
+      <label>الجامعة والكلية</label>
+      <select id="editFaculty">
+        <option>جامعة العلوم والتكنولوجيا هواري بومدين USTHB</option>
+        <option>جامعة الجزائر 1 · كلية الحقوق</option>
+        <option>جامعة قسنطينة · كلية الطب</option>
+        <option>جامعة وهران · العلوم الاقتصادية</option>
+        <option>المدرسة الوطنية المتعددة التقنيات ENP</option>
+      </select>
+    </div>
+    <div class="edit-field">
+      <label>النبذة الشخصية (Bio)</label>
+      <textarea id="editBio" rows="4">طالب ماستر في هندسة المعلوماتية 💻
+USTHB · كلية الإعلام الآلي
+مهتم بالذكاء الاصطناعي، الخوارزميات، وتطوير الويب</textarea>
+    </div>
+    <button class="modal-save" onclick="saveEdit()">حفظ التغييرات ومزامنتها ✓</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="feed.html" class="bottom-nav-item">
+    <span class="bottom-nav-icon">🏠</span>
+    <span class="bottom-nav-label">الرئيسية</span>
+  </a>
+  <a href="inbox.html" class="bottom-nav-item">
+    <span class="bottom-nav-icon">🔔</span>
+    <span class="bottom-nav-label">الإشعارات</span>
+    <span class="bottom-nav-badge">4</span>
+  </a>
+  <button class="bottom-nav-add" onclick="window.location.href='feed.html'">
+    <div class="bottom-nav-add-icon">+</div>
+  </button>
+  <a href="chat.html" class="bottom-nav-item">
+    <span class="bottom-nav-icon">💬</span>
+    <span class="bottom-nav-label">المحادثات</span>
+  </a>
+  <a href="profile.html" class="bottom-nav-item active">
+    <span class="bottom-nav-icon">👤</span>
+    <span class="bottom-nav-label">البروفايل</span>
+  </a>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // Supabase Config
+  const SUPABASE_URL = "https://bcvcfnefyqheuhawagdr.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdmNmbmVmeXFoZXVoYXdhZ2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjk4MTAsImV4cCI6MjA5Njg0NTgxMH0.2MwsmSKQ3jOHP2n833hynQp4pngT8LCXDLNmxzrNrPU";
+
+  let supabaseClient = null;
+
+  // Toast
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Load User Data
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    const demoUser = localStorage.getItem('kulliya_demo_user');
+    if (demoUser) {
+      try {
+        const u = JSON.parse(demoUser);
+        document.getElementById('profileName').textContent = u.full_name || u.name;
+        document.getElementById('editName').value = u.full_name || u.name;
+        document.getElementById('profileHandle').textContent = '@' + u.username;
+        document.getElementById('navUsername').textContent = '@' + u.username;
+        document.getElementById('editUsername').value = u.username;
+        if(u.faculty) {
+          document.getElementById('editFaculty').value = u.faculty;
+          document.getElementById('profileMeta').innerHTML = `<span>🏛️</span> ${u.faculty}<br/><span>📍</span> الجزائر العاصمة`;
+        }
+        const initial = (u.full_name || u.name).charAt(0);
+        document.getElementById('avatarInitial').textContent = initial;
+      } catch(e) {}
+    }
+  });
+
+  function shareProfile() {
+    showToast('↗ تم نسخ رابط بروفايلك بنجاح ✓');
+  }
+
+  function openPostDetail(desc) {
+    showToast('📄 ' + desc);
+  }
+
+  function switchTab(el, type) {
+    document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    
+    const grid = document.getElementById('postsGrid');
+    grid.style.opacity = '0'; grid.style.transition = 'opacity 0.2s ease';
+    
+    setTimeout(() => {
+      if(type === 'saved') {
+        grid.innerHTML = `
+          <div class="grid-post" onclick="openPostDetail('مقال رائع عن الذكاء الاصطناعي')">
+            <div class="grid-post-text">مقال رائع عن مستقبل الذكاء الاصطناعي في التعليم الجامعي 🌟</div>
+            <div class="grid-post-overlay"><span>♥ 567</span></div>
+          </div>
+          <div class="grid-post" onclick="openPostDetail('ملف PDF: مراجع_قانونية.pdf')">
+            <div class="grid-post-icon">📚</div>
+            <div class="grid-post-overlay"><span>♥ 342</span></div>
+          </div>
+        `;
+      } else if(type === 'tagged') {
+        grid.innerHTML = `
+          <div class="grid-post" onclick="openPostDetail('صورة جماعية لفريق التخرج')">
+            <div class="grid-post-icon">📸</div>
+            <div class="grid-post-overlay"><span>♥ 890</span></div>
+          </div>
+        `;
+      } else {
+        window.location.reload();
+      }
+      grid.style.opacity = '1';
+    }, 200);
+  }
+
+  function openEdit() {
+    document.getElementById('editOverlay').classList.add('show');
+    setTimeout(() => document.getElementById('editName').focus(), 100);
+  }
+
+  function handleEditOverlay(e) {
+    if (e.target === document.getElementById('editOverlay')) closeEdit();
+  }
+
+  function closeEdit() {
+    document.getElementById('editOverlay').classList.remove('show');
+  }
+
+  async function saveEdit() {
+    const full_name = document.getElementById('editName').value.trim();
+    const username = document.getElementById('editUsername').value.trim();
+    const faculty = document.getElementById('editFaculty').value;
+    const bio = document.getElementById('editBio').value.trim();
+
+    if (full_name) {
+      document.getElementById('profileName').textContent = full_name;
+      document.getElementById('avatarInitial').textContent = full_name.charAt(0);
+    }
+    if (username) {
+      document.getElementById('profileHandle').textContent = '@' + username;
+      document.getElementById('navUsername').textContent = '@' + username;
+    }
+    if (bio) {
+      document.getElementById('profileBio').innerHTML = bio.replace(/\n/g, '<br/>');
+    }
+    document.getElementById('profileMeta').innerHTML = `<span>🏛️</span> ${faculty}<br/><span>📍</span> الجزائر العاصمة`;
+    
+    const userObj = { full_name, username, faculty, bio };
+    localStorage.setItem('kulliya_demo_user', JSON.stringify(userObj));
+    
+    // Execute real Supabase user update
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('users').update({ full_name, faculty, bio }).eq('username', username);
+      } catch(e) {}
+    }
+
+    closeEdit();
+    showToast('✨ تم حفظ تعديلات ملفك الشخصي بنجاح ✓');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEdit(); });
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0aaecc9e8b3ba84',t:'MTc4MTI4OTAwNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

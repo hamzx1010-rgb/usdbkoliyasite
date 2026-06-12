@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — بوابة الدخول والتوثيق</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0a08;
+      --bg2: #0e0e0b;
+      --bg3: #131310;
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #7a6230;
+      --gold-faint: rgba(201,168,76,0.08);
+      --cream: #f5f0e8;
+      --cream-dim: #9a9488;
+      --border: rgba(201,168,76,0.15);
+      --red: #e05c7a;
+      --green: #4ca87a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Amiri', 'Times New Roman', serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      margin: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.25;
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 10;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      font-family: 'Scheherazade New', 'Amiri', serif;
+      font-size: 3.5rem;
+      color: var(--gold);
+      text-align: center;
+      text-shadow: 0 0 40px rgba(201,168,76,0.3);
+      margin-bottom: 2px;
+      display: block;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 40px; font-weight: bold;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 40px 32px;
+      border-radius: 8px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step { display: none; animation: stepSlideIn 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+    .step.active { display: block; }
+
+    @keyframes stepSlideIn {
+      from { opacity: 0; transform: translateX(-16px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .step-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .step-title {
+      font-family: 'Scheherazade New', 'Amiri', serif;
+      font-size: 1.8rem;
+      color: var(--cream);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .step-desc {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--cream-dim);
+      line-height: 1.7;
+      letter-spacing: 0.03em;
+      margin-bottom: 30px;
+    }
+
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--cream);
+      padding: 12px 16px;
+      font-family: 'Amiri', serif;
+      font-size: 1.05rem;
+      outline: none;
+      transition: all 0.2s ease;
+      text-align: right;
+      border-radius: 4px;
+    }
+
+    .field input:focus, .field select:focus { border-color: var(--gold); background: var(--gold-faint); box-shadow: 0 0 12px rgba(201,168,76,0.2); }
+    .field input::placeholder { color: var(--cream-dim); opacity: 0.4; }
+    .field select { cursor: pointer; }
+
+    .hint {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.52rem;
+      color: var(--cream-dim);
+      letter-spacing: 0.05em;
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      padding: 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      margin-top: 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,168,76,0.35); }
+    .btn-primary:active { transform: translateY(1px); box-shadow: none; }
+
+    .btn-outline {
+      width: 100%;
+      background: transparent;
+      color: var(--cream-dim);
+      border: 1px solid var(--border);
+      padding: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      margin-top: 10px;
+      border-radius: 4px;
+      text-align: center;
+      text-decoration: none;
+      display: block; font-weight: bold;
+    }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); }
+
+    .error-msg {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      color: #e05c7a;
+      letter-spacing: 0.05em;
+      margin-top: 14px;
+      display: none;
+      text-align: center;
+      background: rgba(224, 92, 122, 0.1);
+      border: 1px solid rgba(224, 92, 122, 0.3);
+      padding: 10px;
+      border-radius: 4px; font-weight: bold;
+    }
+    .error-msg.show { display: block; animation: shake 0.3s ease; }
+
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+    .success-check { text-align: center; margin-bottom: 20px; }
+    .check-circle {
+      width: 68px; height: 64px;
+      background: rgba(201,168,76,0.1);
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; font-size: 2rem; color: var(--gold);
+      box-shadow: 0 0 24px rgba(201,168,76,0.25);
+    }
+
+    .progress { display: flex; gap: 6px; margin-bottom: 28px; }
+    .progress-dot { height: 4px; flex: 1; background: var(--border); border-radius: 2px; transition: background 0.3s; }
+    .progress-dot.done { background: var(--gold); }
+    .progress-dot.active { background: var(--gold-dim); }
+
+    .quick-tools { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
+    .quick-link { font-family: 'Space Mono', monospace; color: var(--gold-dim); cursor: pointer; letter-spacing: 0.05em; transition: color 0.2s; text-decoration: none; }
+    .quick-link:hover { color: var(--gold); text-decoration: underline; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg2); border: 1px solid var(--gold); color: var(--gold);
+      font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 12px 24px;
+      letter-spacing: 0.1em; z-index: 1000; opacity: 0; transition: all 0.3s ease;
+      pointer-events: none; border-radius: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); font-weight: bold;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <span class="logo">كلية</span>
+  <div class="logo-sub">الشبكة الجامعية الخاصة</div>
+
+  <div class="card">
+
+    <!-- STEP 1: carte étudiant + bac -->
+    <div class="step active" id="step1">
+      <div class="progress"><div class="progress-dot active"></div><div class="progress-dot"></div></div>
+      <div class="step-label">الخطوة 1 من 2</div>
+      <div class="step-title">تحقق من هويتك الأكاديمية</div>
+      <div class="step-desc">أدخل رقم بطاقة الطالب وكلمة سر البكالوريا المسجلة في وزارة التعليم العالي</div>
+
+      <div class="field">
+        <label>رقم بطاقة الطالب</label>
+        <input type="text" id="carteInput" placeholder="مثال: 202312345" maxlength="14" onkeydown="if(event.key==='Enter') document.getElementById('bacInput').focus()"/>
+        <div class="hint">الرقم الأكاديمي المطبوع على بطاقة الطالب (La carte étudiant)</div>
+      </div>
+
+      <div class="field">
+        <label>كلمة سر أو رقم البكالوريا</label>
+        <input type="password" id="bacInput" placeholder="رقم التسجيل في bac.onec.dz" onkeydown="if(event.key==='Enter') verifyStudentIdentity()"/>
+        <div class="hint">رقم التسجيل أو كلمة السر المستخدمة في كشف نقاط البكالوريا</div>
+      </div>
+
+      <div class="error-msg" id="err1">رقم البطاقة أو بيانات البكالوريا غير صحيحة</div>
+      <button class="btn-primary" onclick="verifyStudentIdentity()">التحقق والمتابعة <span>←</span></button>
+      
+      <div class="quick-tools" style="justify-content:center; margin-top:20px;">
+        <span class="quick-link" onclick="autoFillDemoStudent()" title="ملء بيانات تجريبية للتجربة السريعة">💡 ملء بيانات طالب تجريبية تلقائياً</span>
+      </div>
+    </div>
+
+    <!-- STEP 2: create username + new password -->
+    <div class="step" id="step2">
+      <div class="progress"><div class="progress-dot done"></div><div class="progress-dot active"></div></div>
+      <div class="success-check"><div class="check-circle">✓</div></div>
+      <div class="step-label">الخطوة 2 من 2</div>
+      <div class="step-title">إنشاء حسابك الجامعي</div>
+      <div class="step-desc">اختر اسم مستخدم وكلمة مرور خاصة بك للدخول إلى شبكة كلية</div>
+
+      <div class="field">
+        <label>الاسم الكامل</label>
+        <input type="text" id="nameInput" placeholder="الاسم واللقب الحقيقي" onkeydown="if(event.key==='Enter') document.getElementById('uniSelect').focus()"/>
+      </div>
+
+      <div class="field">
+        <label>الجامعة والكلية</label>
+        <select id="uniSelect" onchange="document.getElementById('usernameInput').focus()">
+          <option>جامعة العلوم والتكنولوجيا هواري بومدين USTHB</option>
+          <option>جامعة الجزائر 1 · كلية الحقوق</option>
+          <option>جامعة قسنطينة · كلية الطب</option>
+          <option>جامعة وهران · العلوم الاقتصادية</option>
+          <option>المدرسة الوطنية المتعددة التقنيات ENP</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>اسم المستخدم</label>
+        <input type="text" id="usernameInput" placeholder="مثال: mohamed_dz" maxlength="20" onkeydown="if(event.key==='Enter') document.getElementById('passInput').focus()"/>
+        <div class="hint">حروف إنجليزية، أرقام، وشرطة سفلية فقط — بدون مسافات</div>
+      </div>
+
+      <div class="field">
+        <label>كلمة المرور الجديدة</label>
+        <input type="password" id="passInput" placeholder="6 أحرف أو أرقام على الأقل" onkeydown="if(event.key==='Enter') submitStudentRegistration()"/>
+      </div>
+
+      <div class="error-msg" id="err2">يرجى إكمال جميع الحقول بشكل صحيح</div>
+      <button class="btn-primary" onclick="submitStudentRegistration()" id="btnRegSubmit">إرسال الطلب للدخول 🚀</button>
+      <button class="btn-outline" onclick="goBackToStep1()">← العودة للخطوة السابقة</button>
+    </div>
+
+    <!-- STEP 3: SUCCESS / PENDING APPROVAL -->
+    <div class="step" id="stepSuccess">
+      <div class="success-check"><div class="check-circle" style="color:var(--green); border-color:var(--green);">🎉</div></div>
+      <div class="step-title" style="color:var(--green); text-align:center;">تم تسجيل طلبك بنجاح!</div>
+      <div class="step-desc" style="text-align:center; font-size:0.7rem; color:var(--cream); line-height:1.8;">
+        تم إرسال بياناتك وبطاقة الطالب إلى **لوحة الإدارة** للمراجعة والمطابقة. فور اعتماد حسابك من المشرف، ستتمكن من النشر والمحادثة.
+      </div>
+      
+      <div style="padding:16px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; margin-bottom:24px; text-align:center;">
+        <div style="font-family:'Space Mono'; color:var(--gold); font-size:0.85rem;" id="successBoxUser">@mohamed_dz</div>
+        <div style="font-size:0.75rem; color:var(--cream-dim); margin-top:4px;" id="successBoxFaculty">USTHB</div>
+      </div>
+
+      <button class="btn-primary" onclick="enterDirectDemo()">🚀 الدخول المباشر للمنصة (النسخة التوضيحية MVP)</button>
+    </div>
+
+  </div>
+
+  <!-- Bottom Aux Links -->
+  <div class="quick-tools" style="justify-content: center;">
+    <a href="feed.html" class="quick-link" onclick="localStorage.setItem('approved','true')">← تصفح المنصة مباشرة (كطالب موثق)</a>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // Supabase Configuration from Pasted Text
+  const SUPABASE_URL = "https://bcvcfnefyqheuhawagdr.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdmNmbmVmeXFoZXVoYXdhZ2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjk4MTAsImV4cCI6MjA5Njg0NTgxMH0.2MwsmSKQ3jOHP2n833hynQp4pngT8LCXDLNmxzrNrPU";
+
+  let supabaseClient = null;
+
+  // Initial redirect check
+  window.addEventListener("DOMContentLoaded", async () => {
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    // If active session exist, redirect to feed
+    if (localStorage.getItem("kulliya_logged_in") === "true" && localStorage.getItem("kulliya_demo_user")) {
+      // window.location.href = "feed.html";
+    }
+  });
+
+  // Toast
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Auto Fill
+  function autoFillDemoStudent() {
+    document.getElementById("carteInput").value = "2026USTHB882";
+    document.getElementById("bacInput").value = "2023991204";
+    showToast("✓ تم ملء رقم البطاقة ورقم البكالوريا");
+    verifyStudentIdentity();
+    setTimeout(() => {
+      document.getElementById("nameInput").value = "محمد بن يوسف";
+      document.getElementById("usernameInput").value = "mohamed_dz";
+      document.getElementById("passInput").value = "Kulliya2026!";
+    }, 300);
+  }
+
+  // Step 1 -> 2
+  function verifyStudentIdentity() {
+    const carte = document.getElementById("carteInput").value.trim();
+    const bac = document.getElementById("bacInput").value.trim();
+    const err = document.getElementById("err1");
+
+    if (carte.length < 5 || bac.length < 4) {
+      err.textContent = "يرجى إدخال رقم بطاقة الطالب ورقم البكالوريا بشكل صحيح (5 أرقام على الأقل)";
+      err.classList.add("show");
+      return;
+    }
+
+    err.classList.remove("show");
+    document.getElementById("step1").classList.remove("active");
+    document.getElementById("step2").classList.add("active");
+    
+    setTimeout(() => document.getElementById("nameInput").focus(), 100);
+  }
+
+  function goBackToStep1() {
+    document.getElementById("step2").classList.remove("active");
+    document.getElementById("step1").classList.add("active");
+  }
+
+  // Step 2 -> Registration Submit
+  async function submitStudentRegistration() {
+    const name = document.getElementById("nameInput").value.trim();
+    const faculty = document.getElementById("uniSelect").value;
+    const username = document.getElementById("usernameInput").value.trim();
+    const pass = document.getElementById("passInput").value;
+    const bac = document.getElementById("bacInput").value.trim();
+    const carte = document.getElementById("carteInput").value.trim();
+    const err = document.getElementById("err2");
+    const btn = document.getElementById("btnRegSubmit");
+
+    if (!name || !username || pass.length < 6) {
+      err.textContent = "يرجى إكمال جميع الحقول (كلمة المرور 6 أحرف على الأقل)";
+      err.classList.add("show");
+      return;
+    }
+
+    err.classList.remove("show");
+    btn.textContent = "جاري إرسال الطلب إلى Supabase..."; btn.style.opacity = "0.7";
+
+    // Save current student details in localStorage for manual review in admin.html & feed.html
+    const studentObj = {
+      full_name: name,
+      username,
+      bac_number: bac || "2023991204",
+      carte_number: carte || "2026USTHB882",
+      faculty,
+      status: "pending"
+    };
+
+    localStorage.setItem("kulliya_demo_user", JSON.stringify(studentObj));
+    localStorage.setItem("kulliya_new_pending", JSON.stringify(studentObj));
+
+    // Execute actual Supabase request if network/client active
+    if (supabaseClient) {
+      try {
+        // 1. Sign Up in Supabase Auth
+        const authRes = await supabaseClient.auth.signUp({
+          email: username + "@kulliya.dz",
+          password: pass,
+          options: {
+            data: { full_name: name, username, faculty, role: "student" }
+          }
+        });
+        
+        // 2. Insert into pending_students table
+        if (authRes.data && authRes.data.user) {
+          await supabaseClient.from('pending_students').insert([{
+            id: authRes.data.user.id,
+            full_name: name,
+            username,
+            bac_number: bac,
+            student_card_url: "https://kulliya.dz/cards/" + carte + ".jpg",
+            faculty,
+            status: "pending"
+          }]);
+        }
+      } catch (e) {
+        console.log("Supabase execution fallback:", e);
+      }
+    }
+
+    // Move to Step 3 (Success)
+    setTimeout(() => {
+      document.getElementById("step2").classList.remove("active");
+      document.getElementById("successBoxUser").textContent = "المعرّف: @" + username;
+      document.getElementById("successBoxFaculty").textContent = faculty;
+      document.getElementById("stepSuccess").classList.add("active");
+      showToast("✨ تم إرسال طلب توثيقك إلى الإدارة ✓");
+    }, 600);
+  }
+
+  // Direct Enter Demo (For MVP / Quick Testing)
+  function enterDirectDemo() {
+    localStorage.setItem("approved", "true");
+    localStorage.setItem("kulliya_logged_in", "true");
+    document.body.style.opacity = "0";
+    document.body.style.transition = "opacity 0.4s ease";
+    setTimeout(() => {
+      window.location.href = "feed.html";
+    }, 400);
+  }
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0aaec9b6827ba84',t:'MTc4MTI4OTAwMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
