@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كلية — الحرم الجامعي الأكاديمي المباشر</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- Universal SDK & WebSockets Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/client.js"></script>
+  <style>
+    :root {
+      --slate-bg: #070709;
+      --glass-panel: #111116;
+      --glass-card: #18181f;
+      --glass-hover: #22222c;
+      --cyber-gold: #f5d061;
+      --cyber-gold-glow: rgba(245, 208, 97, 0.35);
+      --cyber-gold-faint: rgba(245, 208, 97, 0.08);
+      --emerald: #38e490;
+      --emerald-faint: rgba(56, 228, 144, 0.12);
+      --crimson: #ff5874;
+      --crimson-faint: rgba(255, 88, 116, 0.12);
+      --cream-text: #f3f3f2;
+      --cream-dim: #a6a6b0;
+      --border-line: rgba(255, 255, 255, 0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--slate-bg);
+      color: var(--cream-text);
+      font-family: 'Amiri', 'Traditional Arabic', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    body::after {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.5;
+    }
+
+    /* PREMIUM CONSOLIDATED LAYOUT */
+    .app-suite {
+      display: grid;
+      grid-template-columns: 270px 1fr 320px;
+      grid-template-rows: 64px 1fr;
+      min-height: 100vh;
+    }
+
+    /* TOP GLASS NAV */
+    .topnav {
+      grid-column: 1 / -1;
+      background: rgba(11, 11, 22, 0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-line);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .topnav-logo {
+      font-family: 'Scheherazade New', 'Amiri', serif;
+      font-size: 2.1rem; color: var(--cyber-gold);
+      text-shadow: 0 0 24px var(--cyber-gold-glow);
+      text-decoration: none; font-weight: 700;
+    }
+
+    .topnav-search { flex: 1; max-width: 440px; margin: 0 40px; position: relative; }
+    .topnav-search input {
+      width: 100%; padding: 10px 18px 10px 44px; background: var(--glass-card);
+      border: 1px solid var(--border-line); border-radius: 10px; font-family: 'Amiri', serif;
+      font-size: 1rem; color: var(--cream-text); outline: none; transition: all 0.2s; text-align: right;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .topnav-search input:focus { border-color: var(--cyber-gold); background: var(--slate-bg); box-shadow: 0 0 16px var(--cyber-gold-faint); }
+    .topnav-search input::placeholder { color: var(--cream-dim); opacity: 0.4; }
+    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--cyber-gold); font-size: 1rem; cursor: pointer; }
+
+    .topnav-actions { display: flex; align-items: center; gap: 18px; }
+    .nav-icon-btn {
+      background: var(--glass-card); border: 1px solid var(--border-line);
+      color: var(--cream-text); font-size: 1.25rem; width: 40px; height: 40px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; position: relative; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .nav-icon-btn:hover { color: var(--slate-bg); background: var(--cyber-gold); border-color: var(--cyber-gold); transform: translateY(-2px); box-shadow: 0 6px 20px var(--cyber-gold-glow); }
+
+    .topnav-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyber-gold), var(--emerald));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Scheherazade New', serif; font-size: 1.3rem; color: var(--slate-bg); font-weight: bold;
+      cursor: pointer; border: 2px solid var(--cyber-gold); transition: all 0.2s; text-decoration: none; box-shadow: 0 0 16px var(--cyber-gold-faint);
+    }
+    .topnav-avatar:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--cyber-gold-glow); }
+
+    /* LEFT SIDEBAR */
+    .sidebar-left {
+      background: var(--glass-panel); border-left: 1px solid var(--border-line);
+      padding: 32px 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .sidebar-left::-webkit-scrollbar { width: 0; }
+
+    .sidebar-profile-card { padding: 0 24px 28px; border-bottom: 1px solid var(--border-line); text-align: center; }
+    .side-avatar-box {
+      width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg, var(--cyber-gold), var(--emerald));
+      display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', serif;
+      font-size: 2.2rem; color: var(--slate-bg); font-weight: bold; margin: 0 auto 12px;
+      border: 3px solid var(--cyber-gold); box-shadow: 0 8px 24px var(--cyber-gold-faint); text-decoration: none;
+    }
+    .side-user-name { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.35rem; color: var(--cream-text); font-weight: 700; text-decoration: none; display: block; line-height: 1.2; }
+    .side-user-handle { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--cyber-gold); margin-top: 2px; display: block; font-weight: bold; }
+    .side-verified-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--emerald-faint); border: 1px solid var(--emerald); color: var(--emerald); font-family: 'Space Mono', monospace; font-size: 0.55rem; font-weight: bold; border-radius: 6px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 10px; }
+
+    .side-stats-grid { display: flex; justify-content: space-around; margin-top: 20px; }
+    .s-stat { text-align: center; text-decoration: none; cursor: pointer; transition: transform 0.2s; }
+    .s-stat:hover { transform: translateY(-2px); }
+    .s-stat-num { font-family: 'Space Mono', monospace; font-size: 1.05rem; color: var(--cream-text); font-weight: bold; display: block; }
+    .s-stat-lbl { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; display: block; font-weight: bold; }
+
+    .side-navigation { padding: 20px 0; flex: 1; }
+    .nav-suite-item {
+      display: flex; align-items: center; gap: 16px; padding: 14px 28px;
+      color: var(--cream-dim); font-size: 1.05rem; cursor: pointer; transition: all 0.2s;
+      border-right: 4px solid transparent; text-decoration: none; font-weight: bold; user-select: none;
+    }
+    .nav-suite-item:hover { color: var(--cream-text); background: var(--glass-hover); }
+    .nav-suite-item.active { color: var(--cyber-gold); border-right-color: var(--cyber-gold); background: var(--cyber-gold-faint); }
+    .n-icon { font-size: 1.35rem; width: 28px; text-align: center; }
+
+    .side-sys-tools { padding: 20px 24px; border-top: 1px solid var(--border-line); }
+    .sys-tool-lbl { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--cyber-gold); letter-spacing: 0.15em; text-transform: uppercase; font-weight: bold; margin-bottom: 12px; display: block; }
+    .admin-access-btn { width: 100%; padding: 12px; background: rgba(245, 208, 97, 0.12); border: 1px solid var(--cyber-gold); border-radius: 8px; color: var(--cyber-gold); font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 16px var(--cyber-gold-glow); }
+    .admin-access-btn:hover { background: var(--cyber-gold); color: var(--slate-bg); }
+
+    /* MAIN CAMPUS Column */
+    .campus-feed-col { padding-bottom: 100px; background: var(--slate-bg); min-height: calc(100vh - 64px); }
+
+    .timeline-tabs { display: flex; background: rgba(11, 11, 22, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-line); position: sticky; top: 64px; z-index: 150; }
+    .t-tab { flex: 1; padding: 18px; text-align: center; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--cream-dim); font-weight: bold; text-transform: uppercase; letter-spacing: 0.15em; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; user-select: none; }
+    .t-tab:hover { color: var(--cream-text); background: var(--glass-panel); }
+    .t-tab.active { color: var(--cyber-gold); border-bottom-color: var(--cyber-gold); background: var(--glass-panel); box-shadow: 0 0 20px var(--cyber-gold-faint); }
+
+    /* INSTAGRAM INSPIRED ADVANCED COMPOSER */
+    .feed-composer-box { padding: 24px 28px; background: var(--glass-panel); border-bottom: 1px solid var(--border-line); box-shadow: 0 12px 30px rgba(0,0,0,0.6); position: relative; }
+    .composer-head-row { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+    .comp-author-pic { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--cyber-gold), var(--emerald)); color: var(--slate-bg); font-family: 'Scheherazade New', serif; font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid var(--cyber-gold); box-shadow: 0 0 12px var(--cyber-gold-faint); }
+    .comp-textarea { width: 100%; background: transparent; border: none; color: var(--cream-text); font-family: 'Amiri', serif; font-size: 1.18rem; resize: none; outline: none; min-height: 72px; text-align: right; line-height: 1.6; }
+    .comp-textarea::placeholder { color: var(--cream-dim); opacity: 0.45; }
+
+    .comp-attached-hud { padding: 10px 16px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--cyber-gold); display: none; animation: fadeIn 0.2s ease; }
+    .comp-attached-hud.show { display: flex; }
+    .att-del-btn { background: none; border: none; color: var(--crimson); font-size: 1rem; cursor: pointer; }
+
+    .composer-toolbar-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border-line); }
+    .tool-actions-row { display: flex; gap: 12px; }
+    .comp-tool-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--cream-text); font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .comp-tool-btn:hover { border-color: var(--cyber-gold); color: var(--cyber-gold); background: var(--slate-bg); box-shadow: 0 0 12px var(--cyber-gold-faint); transform: translateY(-1px); }
+
+    .btn-exec-publish { padding: 12px 32px; background: var(--cyber-gold); color: var(--slate-bg); border: none; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px var(--cyber-gold-faint); }
+    .btn-exec-publish:hover { background: white; transform: translateY(-2px); box-shadow: 0 10px 28px var(--cyber-gold-glow); }
+    .btn-exec-publish:active { transform: translateY(1px); }
+
+    /* ELITE POSTS CARDS */
+    .post-card { padding: 28px; background: var(--glass-panel); border-bottom: 1px solid var(--border-line); transition: all 0.3s ease; position: relative; animation: fadeIn 0.3s ease; }
+    .post-card:hover { background: var(--glass-card); }
+    .post-card.channel { border-right: 4px solid var(--cyber-gold); background: linear-gradient(90deg, rgba(245,208,97,0.035), transparent 20%); }
+
+    .post-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .post-author-box { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+    .post-author-pic { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--cyber-gold), var(--emerald)); color: var(--slate-bg); font-family: 'Scheherazade New', serif; font-size: 1.3rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid var(--cyber-gold); box-shadow: 0 0 10px var(--cyber-gold-faint); }
+    .post-author-titles { text-align: right; }
+    .post-author-name { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.28rem; color: var(--cream-text); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; line-height: 1.2; }
+    .post-badge-tag { padding: 2px 8px; background: var(--cyber-gold); color: var(--slate-bg); font-family: 'Space Mono', monospace; font-size: 0.52rem; font-weight: bold; border-radius: 4px; letter-spacing: 0.05em; }
+    .post-meta-sub { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--cream-dim); margin-top: 2px; display: block; }
+
+    .post-options-btn { background: none; border: none; color: var(--crimson); font-size: 1rem; font-family: 'Space Mono'; font-weight: bold; cursor: pointer; padding: 4px 10px; transition: all 0.2s; border-radius: 6px; }
+    .post-options-btn:hover { background: var(--crimson-faint); }
+
+    .post-body-content { font-size: 1.1rem; color: var(--cream-text); line-height: 1.8; text-align: right; margin-bottom: 20px; word-break: break-word; }
+    .post-body-content .hashtag { color: var(--cyber-gold); font-weight: bold; text-decoration: none; transition: color 0.2s; cursor: pointer; }
+    .post-body-content .hashtag:hover { color: white; text-decoration: underline; }
+
+    .post-media-showcase { width: 100%; padding: 32px 24px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 12px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--cyber-gold); cursor: pointer; transition: all 0.2s; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); text-align: center; }
+    .post-media-showcase:hover { border-color: var(--cyber-gold); background: #1a1a22; box-shadow: 0 8px 30px rgba(0,0,0,0.6); transform: translateY(-2px); }
+    .media-icon { font-size: 3.5rem; line-height: 1; filter: drop-shadow(0 4px 12px var(--cyber-gold-glow)); }
+    .media-title { font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: bold; color: white; }
+    .media-meta { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--emerald); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .post-actions-bar { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-line); }
+    .action-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 30px; font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--cream-text); font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .action-pill:hover { border-color: var(--cyber-gold); color: var(--cyber-gold); background: var(--slate-bg); box-shadow: 0 0 16px var(--cyber-gold-faint); transform: translateY(-1px); }
+    .action-pill.liked { color: var(--crimson); border-color: var(--crimson); background: var(--crimson-faint); box-shadow: 0 0 16px rgba(255,88,116,0.3); }
+    .action-pill.saved { color: var(--emerald); border-color: var(--emerald); background: var(--emerald-faint); box-shadow: 0 0 16px rgba(56,228,144,0.3); }
+    .action-pill .icon { font-size: 1.25rem; }
+
+    .comments-dropdown-box { margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-line); display: none; animation: fadeIn 0.3s ease; }
+    .comments-dropdown-box.open { display: block; }
+    .comm-item { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+    .comm-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--cyber-gold); color: var(--slate-bg); font-family: 'Scheherazade New', serif; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .comm-prose { flex: 1; padding: 12px 16px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 10px; text-align: right; }
+    .comm-user { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 1.05rem; color: white; font-weight: bold; margin-bottom: 2px; }
+    .comm-txt { font-size: 1rem; color: var(--cream-text); line-height: 1.6; }
+    
+    .comm-composer-row { display: flex; gap: 12px; margin-top: 18px; }
+    .comm-inp { flex: 1; padding: 12px 18px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 10px; font-family: 'Amiri', serif; font-size: 1.05rem; color: white; outline: none; text-align: right; transition: border-color 0.2s; }
+    .comm-inp:focus { border-color: var(--cyber-gold); background: var(--slate-bg); }
+    .comm-exec-btn { padding: 12px 24px; background: var(--emerald); color: var(--slate-bg); border: none; border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px var(--emerald-faint); }
+    .comm-exec-btn:hover { background: white; box-shadow: 0 6px 20px rgba(56,228,144,0.4); transform: translateY(-1px); }
+
+    /* RIGHT SIDEBAR Column */
+    .sidebar-right {
+      background: var(--glass-panel); border-right: 1px solid var(--border-line);
+      padding: 32px 24px; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+    }
+    .sidebar-right::-webkit-scrollbar { width: 0; }
+
+    .radar-widget { margin-bottom: 32px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 8px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .w-title { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--cyber-gold); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border-line); font-weight: bold; }
+
+    /* Channels widget */
+    .channel-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-line); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .channel-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .channel-item:hover .channel-name { color: var(--cyber-gold); }
+    .channel-icon { width: 38px; height: 38px; background: var(--cyber-gold-faint); border: 1px solid var(--border-line); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .channel-info { text-align: right; flex: 1; min-width: 0; }
+    .channel-name { font-family: 'Amiri', serif; font-size: 0.95rem; color: var(--cream-text); transition: color 0.2s; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .channel-members { font-family: 'Space Mono', monospace; font-size: 0.52rem; color: var(--cream-dim); letter-spacing: 0.05em; margin-top: 2px; }
+    .channel-join { background: none; border: 1px solid var(--cyber-gold); color: var(--cyber-gold); font-family: 'Space Mono', monospace; font-size: 0.5rem; padding: 4px 10px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; border-radius: 4px; font-weight: bold; flex-shrink: 0; }
+    .channel-join:hover { background: var(--cyber-gold); color: var(--slate-bg); }
+    .channel-join.joined { background: var(--emerald); color: var(--slate-bg); border-color: var(--emerald); }
+
+    /* People to follow */
+    .follow-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-line); text-decoration: none; }
+    .follow-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .follow-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Scheherazade New', serif; font-size: 1.1rem; color: white; flex-shrink: 0; border: 1px solid var(--border-line); font-weight: bold; background: linear-gradient(135deg, #1a2a3a, #2d4e6e); }
+    .follow-info { text-align: right; flex: 1; min-width: 0; }
+    .follow-name { font-family: 'Amiri', serif; font-size: 0.95rem; color: white; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .follow-uni { font-family: 'Space Mono', monospace; font-size: 0.52rem; color: var(--cream-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .follow-btn { background: none; border: 1px solid var(--cyber-gold); color: var(--cyber-gold); font-family: 'Space Mono', monospace; font-size: 0.5rem; padding: 4px 10px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; border-radius: 4px; font-weight: bold; flex-shrink: 0; }
+    .follow-btn:hover, .follow-btn.following { background: var(--cyber-gold); color: var(--slate-bg); }
+
+    /* TRENDING */
+    .trend-item { padding: 10px 0; border-bottom: 1px solid var(--border-line); cursor: pointer; transition: all 0.2s; }
+    .trend-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .trend-item:hover .trend-tag { color: white; transform: translateX(-4px); }
+    .trend-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); letter-spacing: 0.05em; }
+    .trend-tag { font-family: 'Amiri', serif; font-size: 1.05rem; color: var(--cyber-gold); margin: 3px 0; transition: all 0.2s; font-weight: bold; }
+    .trend-count { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--cream-dim); }
+
+    /* Empty Explore state */
+    .explore-empty { text-align: center; padding: 40px 10px; color: var(--cream-dim); font-size: 0.9rem; }
+
+    /* MOBILE BOTTOM NAV */
+    .mobile-bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+      background: rgba(11, 11, 22, 0.95); backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-line); z-index: 500;
+      align-items: center; justify-content: space-around; padding: 0 12px;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+    }
+    .bot-nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 12px; color: var(--cream-dim); text-decoration: none; transition: all 0.2s; position: relative; }
+    .bot-nav-btn.active { color: var(--cyber-gold); }
+    .b-icon { font-size: 1.4rem; }
+    .b-lbl { font-family: 'Space Mono', monospace; font-size: 0.5rem; font-weight: bold; letter-spacing: 0.05em; }
+    .bot-add-exec { width: 44px; height: 44px; background: var(--cyber-gold); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--slate-bg); font-size: 1.8rem; font-weight: bold; line-height: 1; transition: all 0.2s; box-shadow: 0 0 20px var(--cyber-gold-glow); cursor: pointer; border: none; }
+    .bot-add-exec:hover { transform: scale(1.08); background: white; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--glass-card); border: 1px solid var(--cyber-gold); color: white;
+      font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 14px 28px;
+      letter-spacing: 0.05em; z-index: 1000; opacity: 0; transition: all 0.3s ease;
+      pointer-events: none; border-radius: 10px; box-shadow: 0 16px 40px rgba(0,0,0,0.9); font-weight: bold;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+<div class="app-suite">
+
+  <!-- TOP STICKY NAV -->
+  <nav class="topnav">
+    <div class="topnav-actions">
+      <a href="notifications.html" class="nav-icon-btn" title="الإشعارات والطلبات">
+        <span style="font-size: 1.25rem;">🔔</span>
+        <span class="nav-badge" id="hudBadgeUnread"></span>
+      </a>
+      <a href="chats.html" class="nav-icon-btn" title="غرف المحادثات المباشرة">💬</a>
+      <a href="profile.html" class="topnav-avatar" id="hudUserAvatar" title="الملف الأكاديمي">👑</a>
+    </div>
+    <div class="topnav-search">
+      <span class="search-icon" onclick="executeTimelineSearch(document.getElementById('inpTopQuery').value)">🔍</span>
+      <input type="text" id="inpTopQuery" placeholder="ابحث في محتوى المنشورات، الهاشتاقات، أو أسماء الزملاء..." onkeydown="if(event.key==='Enter') executeTimelineSearch(this.value)" oninput="executeTimelineSearch(this.value)" />
+    </div>
+    <a href="index.html" class="topnav-logo" title="العودة לבوابة الدخول">كلية</a>
+  </nav>
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <div>
+      <div class="sidebar-profile-card">
+        <a href="profile.html" class="side-avatar-box" id="sideUserPic">👑</a>
+        <a href="profile.html" class="side-user-name" id="sideUserName">طالب باحث معتمد</a>
+        <span class="side-user-handle" id="sideUserUsername">@scholar_dz</span>
+        <span class="side-verified-pill">✓ طالب باحث</span>
+        
+        <div class="side-stats-grid">
+          <a href="profile.html" class="s-stat"><span class="s-stat-num" id="sideStatFollowing">62</span><span class="s-stat-lbl">متابَع</span></a>
+          <a href="profile.html" class="s-stat"><span class="s-stat-num" id="sideStatFollowers">84</span><span class="s-stat-lbl">متابِع</span></a>
+          <a href="profile.html" class="s-stat"><span class="s-stat-num" id="sideStatPosts">5</span><span class="s-stat-lbl">منشور</span></a>
+        </div>
+      </div>
+
+      <nav class="side-navigation">
+        <a href="campus.html" class="nav-suite-item active"><span class="n-icon">🏠</span> الحرم الأكاديمي</a>
+        <a href="chats.html" class="nav-suite-item"><span class="n-icon">💬</span> المحادثات <span class="n-badge">2</span></a>
+        <a href="notifications.html" class="nav-suite-item"><span class="n-icon">🔔</span> الإشعارات <span class="n-badge" style="background:var(--emerald);">1</span></a>
+        <a href="profile.html" class="nav-suite-item"><span class="n-icon">👤</span> الملف الشخصي</a>
+        <a href="#" class="nav-suite-item" onclick="KulliyaClient.showToast('مكتبة המراجع الرقمية الموحدة ✓', 'green')"><span class="n-icon">📚</span> المكتبة الرقمية</a>
+      </nav>
+    </div>
+
+    <div class="side-sys-tools">
+      <span class="sys-tool-lbl">أدوات الإشراف والرقابة</span>
+      <button class="admin-access-btn" onclick="openSecureAdminDashboard()">⚡ دخول الإدارة السريّة</button>
+    </div>
+  </aside>
+
+  <!-- CENTRAL CAMPUS Column -->
+  <main class="campus-feed-col">
+    <div class="timeline-tabs">
+      <div class="t-tab active" onclick="switchTimelineTab(this)">البث العام للحرم</div>
+      <div class="t-tab" onclick="switchTimelineTab(this)">المتابَعون</div>
+      <div class="t-tab" onclick="switchTimelineTab(this)">القنوات السيادية</div>
+    </div>
+
+    <!-- INSTAGRAM INSPIRED ADVANCED COMPOSER -->
+    <div class="feed-composer-box">
+      <div class="composer-head-row">
+        <div class="comp-author-pic" id="compUserPic">👑</div>
+        <div class="comp-textarea">
+          <textarea class="comp-textarea" id="inpComposerTxt" placeholder="شارك أبحاثك، أسئلة TP، إعلانات الحرم أو أرفق مذكرات PDF لزملائك..." rows="3" onkeydown="if(event.key==='Enter' && (event.ctrlKey || event.metaKey)) executeSubmitCampusPost()"></textarea>
+        </div>
+      </div>
+
+      <div class="comp-attached-hud" id="hudPdfAttacher">
+        <span>📄 تم إرفاق الوثيقة: <b id="lblAttPdfName" style="color:white;">وثيقة_بحثية.pdf</b> (3.4 MB)</span>
+        <button class="att-del-btn" onclick="removeAttachedPdf()" title="إزالة الوثيقة">✕ إزالة</button>
+      </div>
+
+      <div class="composer-toolbar-footer">
+        <div class="tool-actions-row">
+          <button class="comp-tool-btn" onclick="triggerAttachPdfModal()" title="إرفاق ملف PDF أو مذكرات بحثية">📄 إرفاق PDF</button>
+          <button class="comp-tool-btn" onclick="KulliyaClient.showToast('إرفاق صور أو رسوم بيانية 🖼️', 'gold')" title="إرفاق صورة">🖼️ صورة</button>
+          <button class="comp-tool-btn" onclick="KulliyaClient.showToast('وسم أستاذ أو زميل @', 'green')" title="وسم طالب">@ وسم</button>
+          <button class="comp-tool-btn" onclick="insertComposerTag('#')" title="إدراج هاشتاق أكاديمي"># هاشتاق</button>
+        </div>
+        <button class="btn-exec-publish" onclick="executeSubmitCampusPost()">نشر الإسهام <span>🚀</span></button>
+      </div>
+    </div>
+
+    <!-- POSTS TIMELINE CONTAINER -->
+    <div id="campusPostsContainer">
+      <!-- Rendered dynamically by KulliyaClient Core -->
+    </div>
+  </main>
+
+  <!-- RIGHT SIDEBAR Column -->
+  <aside class="sidebar-right">
+
+    <div class="radar-widget">
+      <div class="w-title"><span>🔍</span> رادار الهاشتاقات النشطة</div>
+      <div id="trendingTopicsContainer">
+        <div class="topic-row" onclick="executeTimelineSearch('#رياضيات_ST')"><span class="topic-tag">#رياضيات_ST</span><span class="topic-meta">342 إسهام نشط</span></div>
+        <div class="topic-row" onclick="executeTimelineSearch('#هندسة_البرمجيات')"><span class="topic-tag">#هندسة_البرمجيات</span><span class="topic-meta">204 إسهام نشط</span></div>
+        <div class="topic-row" onclick="executeTimelineSearch('#بحث_التخرج')"><span class="topic-tag">#بحث_التخرج</span><span class="topic-meta">145 إسهام نشط</span></div>
+        <div class="topic-row" onclick="executeTimelineSearch('#مناقشة_تخرج')"><span class="topic-tag">#مناقشة_تخرج</span><span class="topic-meta">98 إسهام نشط</span></div>
+      </div>
+    </div>
+
+    <div class="radar-widget">
+      <div class="w-title"><span>📢</span> القنوات الجامعية السيادية</div>
+      <div class="rec-channel-row"><div class="c-avatar">🏛️</div><div class="c-details"><span class="c-name">وزارة التعليم العالي</span><span class="c-stat">قناة سيادية معتمدة</span></div><button class="btn-c-sub joined" onclick="executeToggleChannel(this)">✓ مشترك</button></div>
+      <div class="rec-channel-row"><div class="c-avatar">💻</div><div class="c-details"><span class="c-name">نادي الروبوتيك ESI</span><span class="c-stat">3,210 طالب</span></div><button class="btn-c-sub" onclick="executeToggleChannel(this)">اشتراك</button></div>
+      <div class="rec-channel-row"><div class="c-avatar">🔬</div><div class="c-details"><span class="c-name">كلية علوم الطبيعة</span><span class="c-stat">1,890 طالب</span></div><button class="btn-c-sub" onclick="executeToggleChannel(this)">اشتراك</button></div>
+    </div>
+
+    <div class="radar-widget">
+      <div class="w-title"><span>👥</span> زملاء باحثون في الحرم</div>
+      <a href="chats.html" class="rec-friend-row" onclick="localStorage.setItem('targetChat', 'ياسين سليماني')"><div class="f-avatar">ي</div><div class="f-details" style="text-align: right;"><span class="f-name">ياسين سليماني</span><span class="f-uni">USTHB · قسم الإعلام الآلي</span></div></a>
+      <a href="chats.html" class="rec-friend-row" onclick="localStorage.setItem('targetChat', 'سلمى جابري')"><div class="f-avatar">س</div><div class="f-details" style="text-align: right;"><span class="f-name">سلمى جابري</span><span class="f-uni">ENP · المدرسة المتعددة التقنيات</span></div></a>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="campus.html" class="bot-nav-btn active"><span class="b-icon">🏠</span><span class="b-lbl">الحرم</span></a>
+  <a href="notifications.html" class="bot-nav-btn"><span class="b-icon">🔔</span><span class="b-lbl">الإشعارات</span></a>
+  <button class="bot-add-exec" onclick="document.getElementById('inpComposerTxt').focus()">+</button>
+  <a href="chats.html" class="bot-nav-btn"><span class="b-icon">💬</span><span class="b-lbl">المحادثات</span></a>
+  <a href="profile.html" class="bot-nav-btn"><span class="b-icon">👤</span><span class="b-lbl">بروفايل</span></a>
+</nav>
+
+<!-- ATTACH PDF Modal -->
+<div id="customAttachPdfModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:600; display:none; align-items:center; justify-content:center;">
+  <div style="width:100%; max-width:460px; background:var(--glass-panel); border:1px solid var(--cyber-gold); border-radius:16px; padding:36px; text-align:right; box-shadow:0 20px 80px rgba(0,0,0,0.9);">
+    <div style="font-family:'Scheherazade New',serif; font-size:1.8rem; color:var(--cyber-gold); font-weight:bold; margin-bottom:16px;">إرفاق ملخص أو مذكرة أكاديمية (PDF)</div>
+    <div style="font-size:0.95rem; color:var(--cream-dim); margin-bottom:24px;">حدد عنوان الوثيقة البحثية التي ترغب في رفعها لمكتبة الحرم المشتركة:</div>
+    <input type="text" id="inpAttachedPdfTitle" style="width:100%; padding:14px; background:var(--glass-card); border:1px solid var(--border-line); border-radius:10px; font-family:'Amiri',serif; font-size:1.1rem; color:white; outline:none; text-align:right; margin-bottom:24px;" placeholder="مثال: سلسلة_تمارين_محلولة_OOP.pdf" />
+    <div style="display:flex; gap:14px;">
+      <button style="flex:1; padding:14px; background:var(--cyber-gold); color:var(--slate-bg); border:none; border-radius:10px; font-family:'Space Mono'; font-weight:bold; cursor:pointer;" onclick="confirmAttachPdf()">✓ إرفاق وتثبيت الوثيقة</button>
+      <button style="padding:14px 24px; background:transparent; color:var(--crimson); border:1px solid var(--crimson); border-radius:10px; font-family:'Space Mono'; font-weight:bold; cursor:pointer;" onclick="document.getElementById('customAttachPdfModal').style.display='none'">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeAttachedPdfName = "";
+  let curr = null;
+
+  window.addEventListener("DOMContentLoaded", async () => {
+    curr = window.KulliyaClient.getCurrentUser();
+    document.getElementById("sideUserName").textContent = curr.full_name;
+    document.getElementById("sideUserUsername").textContent = "@" + curr.username;
+    document.getElementById("sideStatPosts").textContent = curr.posts_count || 0;
+    document.getElementById("sideStatFollowers").textContent = curr.followers_count || 0;
+    document.getElementById("sideStatFollowing").textContent = curr.following_count || 0;
+    
+    document.getElementById("hudUserAvatar").textContent = curr.avatar_icon || "👑";
+    document.getElementById("sideUserPic").textContent = curr.avatar_icon || "👑";
+    document.getElementById("compUserPic").textContent = curr.avatar_icon || "👑";
+
+    await renderCampusPostsTimeline();
+
+    if (window.KulliyaClient.getSocket()) {
+      window.KulliyaClient.getSocket().on('new_campus_post', async () => await renderCampusPostsTimeline());
+      window.KulliyaClient.getSocket().on('post_deleted', async () => await renderCampusPostsTimeline());
+      window.KulliyaClient.getSocket().on('post_liked', async () => await renderCampusPostsTimeline());
+      window.KulliyaClient.getSocket().on('new_post_comment', async () => await renderCampusPostsTimeline());
+    }
+  });
+
+  function executeTimelineSearch(query) {
+    const val = query.toLowerCase().trim();
+    const cards = document.querySelectorAll("#campusPostsContainer .post-card");
+    cards.forEach(c => {
+      const txt = c.textContent.toLowerCase();
+      c.style.display = txt.includes(val) ? "block" : "none";
+    });
+  }
+
+  async function renderCampusPostsTimeline() {
+    let posts = await window.KulliyaClient.getPosts();
+
+    let myCnt = posts.filter(p => p.author === curr.full_name).length;
+    document.getElementById("sideStatPosts").textContent = myCnt;
+    curr.posts_count = myCnt; window.KulliyaClient.setCurrentUser(curr);
+
+    const cont = document.getElementById("campusPostsContainer");
+    cont.innerHTML = "";
+
+    if (posts.length === 0) {
+      cont.innerHTML = `
+        <div style="padding:120px 20px; text-align:center; color:var(--cream-dim); background:var(--glass-card); border-radius:16px;">
+          <div style="font-size:4rem; margin-bottom:16px; opacity:0.3;">🎓</div>
+          <div style="font-family:'Space Mono', monospace; font-size:1.05rem; color:var(--cyber-gold); font-weight:bold; margin-bottom:8px;">الحرم الجامعي خالي من الإسهامات</div>
+          <div style="font-size:1.1rem; line-height:1.7; max-width:500px; margin:0 auto;">كن أول من يثري المنصة! شارك أسئلة بحثية، إعلانات جامعية، أو مذكرات تخرج PDF باستخدام الصندوق أعلاه.</div>
+        </div>
+      `;
+      return;
+    }
+
+    posts.forEach(p => {
+      const cardEl = document.createElement("div");
+      cardEl.className = "post-card" + (p.is_channel || p.type === 'announcement' ? ' channel' : '');
+      cardEl.id = "p-elem-" + p.id;
+
+      const init = p.is_channel || p.type === 'announcement' ? '📢' : p.author.charAt(0);
+      const isMine = p.author === curr.full_name;
+      const optsBtnHtml = isMine ? `<button class="post-options-btn" style="color:var(--crimson);" onclick="executeDeletePost('${p.id}', event)" title="حذف إسهامك نهائياً">🗑️ حذف</button>` : `<button class="post-options-btn" onclick="window.KulliyaClient.showToast('خيارات الرقابة والمشاركة')">⋯</button>`;
+
+      let auxMediaHtml = "";
+      if (p.type === 'pdf') {
+        auxMediaHtml = `
+          <div class="post-media-showcase" onclick="window.KulliyaClient.showToast('جاري تحميل الوثيقة البحثية: ${p.file_name} ✓', 'green')">
+            <div class="media-icon">📄</div>
+            <div class="media-title">${p.file_name || 'سلسلة_تمارين_محلولة.pdf'}</div>
+            <div class="media-meta">PDF Document · ${p.file_size || '2.8 MB'} · انقر للتحميل للمكتبة</div>
+          </div>
+        `;
+      } else if (p.type === 'milestone') {
+        auxMediaHtml = `
+          <div class="post-media-showcase" style="border-color:var(--emerald); background:rgba(56,228,144,0.05);" onclick="window.KulliyaClient.showToast('تهانينا للأستاذ/الطالب بهذا الإنجاز 🌹', 'green')">
+            <div class="media-icon" style="filter:drop-shadow(0 0 16px var(--emerald));">🎓🎉</div>
+            <div class="media-title" style="color:var(--emerald);">إنجاز أكاديمي موثق</div>
+            <div class="media-meta" style="color:white;">تم الاعتماد والمباركة من اللجنة العلمية</div>
+          </div>
+        `;
+      }
+
+      let cListHtml = "";
+      (p.comments || []).forEach(comm => {
+        cListHtml += `
+          <div class="comm-item">
+            <div class="comm-avatar">${comm.author.charAt(0)}</div>
+            <div class="comm-prose">
+              <div class="comm-user">${comm.author}</div>
+              <div class="comm-txt">${comm.text}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      cardEl.innerHTML = `
+        <div class="post-card-head">
+          <div class="post-author-box">
+            <a href="chats.html" class="post-author-pic" onclick="localStorage.setItem('targetChat','${p.author}')">${init}</a>
+            <div class="post-author-titles">
+              <a href="chats.html" class="post-author-name" onclick="localStorage.setItem('targetChat','${p.author}')">${p.author} <span class="post-badge-tag">${p.badge || 'طالب باحث'}</span></a>
+              <span class="post-meta-sub">${p.faculty} · ${p.time}</span>
+            </div>
+          </div>
+          ${optsBtnHtml}
+        </div>
+
+        <div class="post-body-content">${p.content.replace(/\n/g, '<br/>')}</div>
+        ${auxMediaHtml}
+
+        <div class="post-actions-bar">
+          <button class="action-pill${p.likes > 500 ? ' liked' : ''}" onclick="window.KulliyaClient.likePost('${p.id}', this)">
+            <span class="icon">♥</span>
+            <span class="cnt">${p.likes}</span>
+          </button>
+          <button class="action-pill" onclick="togglePostComments('comm-drop-${p.id}')">
+            <span class="icon">💬</span>
+            <span>${(p.comments || []).length} تعليق</span>
+          </button>
+          <button class="action-pill" onclick="window.KulliyaClient.showToast('↗ تم نسخ الرابط الأكاديمي بنجاح ✓', 'green')">
+            <span class="icon">↗</span>
+            <span>مشاركة</span>
+          </button>
+          <button class="action-pill${p.saved ? ' saved' : ''}" onclick="window.KulliyaClient.savePost('${p.id}', this)">
+            <span class="icon">🔖</span>
+            <span>حفظ</span>
+          </button>
+        </div>
+
+        <div class="comments-dropdown-box" id="comm-drop-${p.id}">
+          <div id="comm-render-list-${p.id}">${cListHtml}</div>
+          <div class="comm-composer-row">
+            <input type="text" class="comm-inp" id="inp-c-txt-${p.id}" placeholder="أضف تعليقاً أكاديمياً..." onkeydown="if(event.key==='Enter') executeAddPostComment('${p.id}')" />
+            <button class="comm-exec-btn" onclick="executeAddPostComment('${p.id}')">إرسال</button>
+          </div>
+        </div>
+      `;
+      cont.appendChild(cardEl);
+    });
+  }
+
+  function triggerAttachPdfModal() {
+    document.getElementById("customAttachPdfModal").style.display = "flex";
+    setTimeout(() => document.getElementById("inpAttachedPdfTitle").focus(), 100);
+  }
+
+  function confirmAttachPdf() {
+    const val = document.getElementById("inpAttachedPdfTitle").value.trim() || "ملخص_محاضرات_شامل.pdf";
+    activeAttachedPdfName = val;
+    document.getElementById("lblAttPdfName").textContent = val;
+    document.getElementById("hudPdfAttacher").classList.add("show");
+    document.getElementById("customAttachPdfModal").style.display = "none";
+    window.KulliyaClient.showToast("📄 تم إرفاق وثيقة الـ PDF بنجاح ✓", "green");
+  }
+
+  function removeAttachedPdf() {
+    activeAttachedPdfName = "";
+    document.getElementById("hudPdfAttacher").classList.remove("show");
+  }
+
+  function insertComposerTag(t) {
+    const ta = document.getElementById("inpComposerTxt"); ta.value += " " + t; ta.focus();
+  }
+
+  async function executeSubmitCampusPost() {
+    const ta = document.getElementById("inpComposerTxt");
+    const txt = ta.value.trim();
+    if (!txt && !activeAttachedPdfName) { window.KulliyaClient.showToast("يرجى كتابة نص أو إرفاق وثيقة بحثية قبل النشر!", "red"); return; }
+
+    const postContent = txt || ("إرفاق وثيقة بحثية أكاديمية: " + activeAttachedPdfName);
+    const postType = activeAttachedPdfName ? "pdf" : "regular";
+
+    await window.KulliyaClient.createPost(postContent, postType, activeAttachedPdfName, activeAttachedPdfName ? "3.2 MB" : "");
+    ta.value = ""; removeAttachedPdf();
+    await renderCampusPostsTimeline();
+  }
+
+  async function executeDeletePost(id, event) {
+    event.stopPropagation();
+    if (!confirm("تأكيد سحب وحذف المحتوى الأكاديمي نهائياً من قاعدة المنصة؟")) return;
+    await window.KulliyaClient.deletePost(id);
+    const elem = document.getElementById("p-elem-" + id);
+    if(elem) { elem.style.opacity = "0"; setTimeout(() => elem.remove(), 300); }
+  }
+
+  function togglePostComments(boxId) {
+    const b = document.getElementById(boxId); if(b) b.classList.toggle("open");
+  }
+
+  async function executeAddPostComment(postId) {
+    const inp = document.getElementById("inp-c-txt-" + postId);
+    if(!inp || !inp.value.trim()) return;
+    const txt = inp.value.trim(); inp.value = "";
+
+    const cItem = await window.KulliyaClient.addComment(postId, txt);
+    if (cItem) {
+      const lArea = document.getElementById("comm-render-list-" + postId);
+      if(lArea) {
+        const row = document.createElement("div"); row.className = "comm-item";
+        row.innerHTML = `<div class="comm-avatar">${cItem.author.charAt(0)}</div><div class="comm-prose"><div class="comm-user">${cItem.author}</div><div class="comm-txt">${cItem.text}</div></div>`;
+        lArea.appendChild(row);
+      }
+      const pElem = document.getElementById("p-elem-" + postId);
+      if(pElem) {
+        const cBtn = pElem.querySelectorAll(".action-pill")[1];
+        if(cBtn) cBtn.querySelector("span:last-child").textContent = `${pElem.querySelectorAll(".comm-item").length} تعليق`;
+      }
+    }
+  }
+
+  function executeToggleChannel(btnEl) {
+    let joined = btnEl.classList.toggle("joined");
+    btnEl.textContent = joined ? "✓ مشترك" : "اشتراك";
+    window.KulliyaClient.showToast(joined ? "✨ تم الاشتراك بالقناة السيادية بنجاح ✓" : "تم إلغاء الاشتراك", joined ? "green" : "gold");
+  }
+
+  function switchTimelineTab(tabEl) {
+    document.querySelectorAll(".t-tab").forEach(t => t.classList.remove("active")); tabEl.classList.add("active");
+    window.KulliyaClient.showToast("✓ جاري جلب محتوى الفئة المحددة", "gold");
+  }
+
+  function openSecureAdminDashboard() { window.location.href = "vault_admin.html"; }
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0abbcd7cfc91b23',t:'MTc4MTI5NzUyOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

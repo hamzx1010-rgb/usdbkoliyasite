@@ -3,508 +3,348 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>كلية — بوابة الدخول والتوثيق</title>
+  <title>كلية — منصة الحرم الجامعي الخاصة والأكثر أماناً (Premium Hub)</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Ultimate Pure Autonomous WebSockets & Client SDK -->
+  <script src="js/client.js"></script>
   <style>
     :root {
-      --bg: #0a0a08;
-      --bg2: #0e0e0b;
-      --bg3: #131310;
-      --gold: #c9a84c;
-      --gold-light: #e8c97a;
-      --gold-dim: #7a6230;
-      --gold-faint: rgba(201,168,76,0.08);
-      --cream: #f5f0e8;
-      --cream-dim: #9a9488;
-      --border: rgba(201,168,76,0.15);
-      --red: #e05c7a;
-      --green: #4ca87a;
+      --slate-bg: #070709;
+      --glass-panel: #111116;
+      --glass-card: #18181f;
+      --glass-hover: #22222c;
+      --cyber-gold: #f5d061;
+      --cyber-gold-glow: rgba(245, 208, 97, 0.35);
+      --cyber-gold-faint: rgba(245, 208, 97, 0.08);
+      --emerald: #38e490;
+      --emerald-faint: rgba(56, 228, 144, 0.12);
+      --crimson: #ff5874;
+      --crimson-faint: rgba(255, 88, 116, 0.12);
+      --cream-text: #f3f3f2;
+      --cream-dim: #a6a6b0;
+      --border-line: rgba(255, 255, 255, 0.1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--bg);
-      color: var(--cream);
-      font-family: 'Amiri', 'Times New Roman', serif;
+      background: var(--slate-bg);
+      color: var(--cream-text);
+      font-family: 'Amiri', 'Traditional Arabic', serif;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      position: relative;
-      margin: 0;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.25;
-    }
-
-    .login-wrap {
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-      z-index: 10;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .logo {
-      font-family: 'Scheherazade New', 'Amiri', serif;
-      font-size: 3.5rem;
-      color: var(--gold);
-      text-align: center;
-      text-shadow: 0 0 40px rgba(201,168,76,0.3);
-      margin-bottom: 2px;
-      display: block;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .logo-sub {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.62rem;
-      color: var(--gold-dim);
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 40px; font-weight: bold;
-    }
-
-    .card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      padding: 40px 32px;
-      border-radius: 8px;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .step { display: none; animation: stepSlideIn 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
-    .step.active { display: block; }
-
-    @keyframes stepSlideIn {
-      from { opacity: 0; transform: translateX(-16px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    .step-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.6rem;
-      color: var(--gold-dim);
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
-    .step-title {
-      font-family: 'Scheherazade New', 'Amiri', serif;
-      font-size: 1.8rem;
-      color: var(--cream);
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
-    .step-desc {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.6rem;
-      color: var(--cream-dim);
-      line-height: 1.7;
-      letter-spacing: 0.03em;
-      margin-bottom: 30px;
-    }
-
-    .field { margin-bottom: 20px; }
-    .field label {
-      display: block;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.58rem;
-      color: var(--gold-dim);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-      font-weight: 700;
-    }
-
-    .field input, .field select {
-      width: 100%;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--cream);
-      padding: 12px 16px;
-      font-family: 'Amiri', serif;
-      font-size: 1.05rem;
-      outline: none;
-      transition: all 0.2s ease;
-      text-align: right;
-      border-radius: 4px;
-    }
-
-    .field input:focus, .field select:focus { border-color: var(--gold); background: var(--gold-faint); box-shadow: 0 0 12px rgba(201,168,76,0.2); }
-    .field input::placeholder { color: var(--cream-dim); opacity: 0.4; }
-    .field select { cursor: pointer; }
-
-    .hint {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.52rem;
-      color: var(--cream-dim);
-      letter-spacing: 0.05em;
-      margin-top: 6px;
-      line-height: 1.6;
-    }
-
-    .btn-primary {
-      width: 100%;
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
-      padding: 14px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      margin-top: 12px;
-      border-radius: 4px;
-      font-weight: bold;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-
-    .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,168,76,0.35); }
-    .btn-primary:active { transform: translateY(1px); box-shadow: none; }
-
-    .btn-outline {
-      width: 100%;
-      background: transparent;
-      color: var(--cream-dim);
-      border: 1px solid var(--border);
-      padding: 12px;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      margin-top: 10px;
-      border-radius: 4px;
-      text-align: center;
-      text-decoration: none;
-      display: block; font-weight: bold;
-    }
-    .btn-outline:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); }
-
-    .error-msg {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.6rem;
-      color: #e05c7a;
-      letter-spacing: 0.05em;
-      margin-top: 14px;
-      display: none;
-      text-align: center;
-      background: rgba(224, 92, 122, 0.1);
-      border: 1px solid rgba(224, 92, 122, 0.3);
-      padding: 10px;
-      border-radius: 4px; font-weight: bold;
-    }
-    .error-msg.show { display: block; animation: shake 0.3s ease; }
-
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-
-    .success-check { text-align: center; margin-bottom: 20px; }
-    .check-circle {
-      width: 68px; height: 64px;
-      background: rgba(201,168,76,0.1);
-      border: 2px solid var(--gold);
-      border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px; font-size: 2rem; color: var(--gold);
-      box-shadow: 0 0 24px rgba(201,168,76,0.25);
+      position: relative; margin: 0; overflow-x: hidden;
     }
 
-    .progress { display: flex; gap: 6px; margin-bottom: 28px; }
-    .progress-dot { height: 4px; flex: 1; background: var(--border); border-radius: 2px; transition: background 0.3s; }
-    .progress-dot.done { background: var(--gold); }
-    .progress-dot.active { background: var(--gold-dim); }
-
-    .quick-tools { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
-    .quick-link { font-family: 'Space Mono', monospace; color: var(--gold-dim); cursor: pointer; letter-spacing: 0.05em; transition: color 0.2s; text-decoration: none; }
-    .quick-link:hover { color: var(--gold); text-decoration: underline; }
-
-    /* TOAST */
-    .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--bg2); border: 1px solid var(--gold); color: var(--gold);
-      font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 12px 24px;
-      letter-spacing: 0.1em; z-index: 1000; opacity: 0; transition: all 0.3s ease;
-      pointer-events: none; border-radius: 4px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); font-weight: bold;
+    /* Ambient UI Background Cyber Orbs */
+    .ambient-orb {
+      position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 1;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .orb-gold { width: 450px; height: 450px; top: -150px; right: -100px; background: rgba(245, 208, 97, 0.15); animation: floatOrb 8s ease infinite alternate; }
+    .orb-emerald { width: 500px; height: 500px; bottom: -200px; left: -150px; background: rgba(56, 228, 144, 0.12); animation: floatOrb 10s ease infinite alternate-reverse; }
+
+    @keyframes floatOrb {
+      from { transform: translate(0, 0); }
+      to { transform: translate(-40px, 40px); }
+    }
+
+    /* Subtle Glass Mesh */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 2; opacity: 0.6;
+    }
+
+    /* DUAL PANE PORTAL HUB */
+    .auth-container {
+      width: 100%; max-width: 1120px; min-height: 640px;
+      background: var(--glass-panel); border: 1px solid var(--border-line);
+      border-radius: 20px; box-shadow: 0 24px 80px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.08);
+      display: grid; grid-template-columns: 1.1fr 0.9fr;
+      position: relative; z-index: 10; overflow: hidden;
+    }
+
+    /* Right Branding Hero Column */
+    .brand-hero {
+      padding: 60px 48px; background: linear-gradient(135deg, var(--glass-card), rgba(245, 208, 97, 0.05));
+      border-left: 1px solid var(--border-line); display: flex; flex-direction: column; justify-content: space-between; position: relative;
+    }
+    .brand-title-box { text-align: right; }
+    .brand-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; background: var(--cyber-gold-faint);
+      border: 1px solid var(--cyber-gold); border-radius: 30px;
+      font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--cyber-gold); font-weight: bold;
+      letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 20px; box-shadow: 0 0 16px var(--cyber-gold-glow);
+    }
+    .hero-main-title { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 4.8rem; color: var(--cyber-gold); font-weight: 700; line-height: 1.05; margin-bottom: 12px; text-shadow: 0 4px 30px var(--cyber-gold-glow); }
+    .hero-sub-title { font-family: 'Amiri', serif; font-size: 1.25rem; color: var(--cream-text); line-height: 1.6; max-width: 420px; }
+
+    /* Live Student Stats Showcase */
+    .live-campus-showcase { padding: 24px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 14px; }
+    .showcase-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .showcase-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--emerald); font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+    .pulse-dot { width: 8px; height: 8px; background: var(--emerald); border-radius: 50%; box-shadow: 0 0 10px var(--emerald); animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+    .campus-ticker-row { display: flex; gap: 20px; }
+    .ticker-stat { flex: 1; }
+    .t-num { font-family: 'Space Mono', monospace; font-size: 1.8rem; color: var(--cream-text); font-weight: bold; display: block; }
+    .t-lbl { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--cream-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; display: block; }
+
+    .quick-test-action { margin-top: 20px; display: flex; gap: 10px; }
+    .btn-quick-fill { flex: 1; padding: 10px; background: var(--glass-hover); border: 1px solid var(--border-line); border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--cyber-gold); font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .btn-quick-fill:hover { background: var(--cyber-gold); color: var(--slate-bg); box-shadow: 0 0 16px var(--cyber-gold-glow); }
+
+    /* Left Secure Flow Column */
+    .auth-forms-hub { padding: 60px 48px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+
+    .form-step { display: none; animation: hubSlideIn 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+    .form-step.active { display: block; }
+
+    @keyframes hubSlideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    .step-header { margin-bottom: 32px; }
+    .step-indicator { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--cyber-gold); font-weight: bold; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+    .step-main-heading { font-family: 'Scheherazade New', 'Amiri', serif; font-size: 2.2rem; color: var(--cream-text); font-weight: 700; line-height: 1.2; }
+    .step-description { font-family: 'Amiri', serif; font-size: 1rem; color: var(--cream-dim); margin-top: 4px; }
+
+    .input-field-group { margin-bottom: 24px; text-align: right; }
+    .input-label { display: block; font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--cream-text); font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+    .styled-input, .styled-select { width: 100%; padding: 14px 18px; background: var(--glass-card); border: 1px solid var(--border-line); border-radius: 10px; font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--cream-text); outline: none; transition: all 0.2s ease; text-align: right; box-shadow: inset 0 2px 6px rgba(0,0,0,0.4); }
+    .styled-input:focus, .styled-select:focus { border-color: var(--cyber-gold); background: var(--slate-bg); box-shadow: 0 0 16px var(--cyber-gold-faint); }
+    .styled-input::placeholder { color: var(--cream-dim); opacity: 0.4; }
+    .styled-select { cursor: pointer; }
+    .field-aux-note { font-family: 'Space Mono', monospace; font-size: 0.58rem; color: var(--cream-dim); margin-top: 6px; display: block; }
+
+    .auth-btn-exec { width: 100%; padding: 16px; background: var(--cyber-gold); border: none; border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--slate-bg); font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 24px var(--cyber-gold-faint); margin-top: 10px; }
+    .auth-btn-exec:hover { background: white; transform: translateY(-2px); box-shadow: 0 12px 32px var(--cyber-gold-glow); }
+    .auth-btn-exec:active { transform: translateY(1px); }
+
+    .btn-aux-back { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border-line); border-radius: 10px; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--cream-dim); font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; margin-top: 12px; }
+    .btn-aux-back:hover { border-color: var(--cyber-gold); color: var(--cyber-gold); }
+
+    .error-banner { padding: 12px 16px; background: rgba(255, 88, 116, 0.15); border: 1px solid var(--crimson); border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--crimson); font-weight: bold; text-align: center; margin-bottom: 20px; display: none; }
+    .error-banner.show { display: block; animation: shakeErr 0.3s ease; }
+    @keyframes shakeErr { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+    /* Bypass direct access */
+    .direct-access-bar { position: absolute; bottom: 20px; left: 48px; right: 48px; text-align: center; padding-top: 16px; border-top: 1px solid var(--border-line); }
+    .direct-link { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--cyber-gold); font-weight: bold; text-decoration: none; cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s; }
+    .direct-link:hover { color: white; text-decoration: underline; }
+
+    /* TOAST HUD */
+    .kulliya-toast-box {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--glass-card); border: 1px solid var(--cyber-gold); border-radius: 10px;
+      padding: 14px 28px; display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.9), 0 0 20px var(--cyber-gold-faint);
+      z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .kulliya-toast-box.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .kulliya-toast-box.green { border-color: var(--emerald); }
+    .kulliya-toast-box.red { border-color: var(--crimson); }
+    .toast-icon { font-size: 1.2rem; }
+    .toast-txt { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: white; font-weight: bold; letter-spacing: 0.05em; }
+
+    @media (max-width: 1024px) {
+      .auth-container { grid-template-columns: 1fr; border-radius: 0; border: none; min-height: 100vh; }
+      .brand-hero { padding: 40px 32px; border-left: none; border-bottom: 1px solid var(--border-line); }
+      .auth-forms-hub { padding: 40px 32px; flex: 1; }
+      .direct-access-bar { position: relative; bottom: auto; left: auto; right: auto; margin-top: 30px; }
+    }
   </style>
 </head>
 <body>
 
-<div class="login-wrap">
-  <span class="logo">كلية</span>
-  <div class="logo-sub">الشبكة الجامعية الخاصة</div>
+<!-- Ambient Orbs -->
+<div class="ambient-orb orb-gold"></div>
+<div class="ambient-orb orb-emerald"></div>
 
-  <div class="card">
-
-    <!-- STEP 1: carte étudiant + bac -->
-    <div class="step active" id="step1">
-      <div class="progress"><div class="progress-dot active"></div><div class="progress-dot"></div></div>
-      <div class="step-label">الخطوة 1 من 2</div>
-      <div class="step-title">تحقق من هويتك الأكاديمية</div>
-      <div class="step-desc">أدخل رقم بطاقة الطالب وكلمة سر البكالوريا المسجلة في وزارة التعليم العالي</div>
-
-      <div class="field">
-        <label>رقم بطاقة الطالب</label>
-        <input type="text" id="carteInput" placeholder="مثال: 202312345" maxlength="14" onkeydown="if(event.key==='Enter') document.getElementById('bacInput').focus()"/>
-        <div class="hint">الرقم الأكاديمي المطبوع على بطاقة الطالب (La carte étudiant)</div>
-      </div>
-
-      <div class="field">
-        <label>كلمة سر أو رقم البكالوريا</label>
-        <input type="password" id="bacInput" placeholder="رقم التسجيل في bac.onec.dz" onkeydown="if(event.key==='Enter') verifyStudentIdentity()"/>
-        <div class="hint">رقم التسجيل أو كلمة السر المستخدمة في كشف نقاط البكالوريا</div>
-      </div>
-
-      <div class="error-msg" id="err1">رقم البطاقة أو بيانات البكالوريا غير صحيحة</div>
-      <button class="btn-primary" onclick="verifyStudentIdentity()">التحقق والمتابعة <span>←</span></button>
-      
-      <div class="quick-tools" style="justify-content:center; margin-top:20px;">
-        <span class="quick-link" onclick="autoFillDemoStudent()" title="ملء بيانات تجريبية للتجربة السريعة">💡 ملء بيانات طالب تجريبية تلقائياً</span>
-      </div>
+<!-- Dual Pane Auth Hub -->
+<div class="auth-container">
+  
+  <!-- Right Hero Pane -->
+  <div class="brand-hero">
+    <div class="brand-title-box">
+      <div class="brand-badge"><span>⚡</span> الشبكة الأكاديمية السيادية الموحدة</div>
+      <h1 class="hero-main-title">كلية</h1>
+      <p class="hero-sub-title">المنظومة الاجتماعية المستقلة والأكثر أماناً لطلبة وباحثي الجامعات الجزائرية. تواصل، شارك المراجع، وابنِ مسارك الأكاديمي.</p>
     </div>
 
-    <!-- STEP 2: create username + new password -->
-    <div class="step" id="step2">
-      <div class="progress"><div class="progress-dot done"></div><div class="progress-dot active"></div></div>
-      <div class="success-check"><div class="check-circle">✓</div></div>
-      <div class="step-label">الخطوة 2 من 2</div>
-      <div class="step-title">إنشاء حسابك الجامعي</div>
-      <div class="step-desc">اختر اسم مستخدم وكلمة مرور خاصة بك للدخول إلى شبكة كلية</div>
-
-      <div class="field">
-        <label>الاسم الكامل</label>
-        <input type="text" id="nameInput" placeholder="الاسم واللقب الحقيقي" onkeydown="if(event.key==='Enter') document.getElementById('uniSelect').focus()"/>
+    <!-- Live Ticker Showcase -->
+    <div class="live-campus-showcase">
+      <div class="showcase-head">
+        <span class="showcase-label"><span class="pulse-dot"></span> نبض الحرم اللحظي</span>
+        <span style="font-family:'Space Mono', monospace; font-size:0.6rem; color:var(--cream-dim);">Express Real-time Engine</span>
+      </div>
+      <div class="campus-ticker-row">
+        <div class="ticker-stat"><span class="t-num" id="heroStatUsers">4,827</span><span class="t-lbl">طالب باحث</span></div>
+        <div class="ticker-stat"><span class="t-num" id="heroStatPosts">1,424</span><span class="t-lbl">إسهام نشط</span></div>
+        <div class="ticker-stat"><span class="t-num">8</span><span class="t-lbl">غرف TP</span></div>
       </div>
 
-      <div class="field">
-        <label>الجامعة والكلية</label>
-        <select id="uniSelect" onchange="document.getElementById('usernameInput').focus()">
-          <option>جامعة العلوم والتكنولوجيا هواري بومدين USTHB</option>
-          <option>جامعة الجزائر 1 · كلية الحقوق</option>
-          <option>جامعة قسنطينة · كلية الطب</option>
-          <option>جامعة وهران · العلوم الاقتصادية</option>
-          <option>المدرسة الوطنية المتعددة التقنيات ENP</option>
+      <!-- Founder setup actions -->
+      <div class="quick-test-action">
+        <button class="btn-quick-fill" onclick="autoFillStudentFlow()" title="توليد وتجربة تسجيل طالب مستجد">💡 ملء بيانات طالب مستجد</button>
+        <button class="btn-quick-fill" style="color:var(--crimson); border-color:var(--crimson);" onclick="autoFillAdminFlow()" title="الدخول المباشر كمشرف عام">⚡ دخول المشرف (Admin)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Left Interactive Flow Hub -->
+  <div class="auth-forms-hub">
+    
+    <!-- STEP 1: Academic Identity Validation -->
+    <div class="form-step active" id="flowStep1">
+      <div class="step-header">
+        <span class="step-indicator">المرحلة 1 من 2</span>
+        <h2 class="step-main-heading">مطابقة الهوية الأكاديمية</h2>
+        <p class="step-description">أدخل رقم بطاقة الطالب ورقم تسجيل البكالوريا للتحقق من هويتك الأكاديمية.</p>
+      </div>
+
+      <div class="error-banner" id="errBannerStep1">عفواً، بيانات الهوية الأكاديمية غير متطابقة</div>
+
+      <div class="input-field-group">
+        <label class="input-label">رقم بطاقة الطالب (La carte étudiant)</label>
+        <input type="text" class="styled-input" id="inpCarte" placeholder="مثال: 2026-USTHB-9912" maxlength="18" onkeydown="if(event.key==='Enter') document.getElementById('inpBac').focus()" />
+        <span class="field-aux-note">الرقم السيادي المطبوع أسفل بطاقة الطالب الذكية أو الورقية</span>
+      </div>
+
+      <div class="input-field-group">
+        <label class="input-label">رقم تسجيل البكالوريا (Numéro Bac)</label>
+        <input type="password" class="styled-input" id="inpBac" placeholder="رقم التسجيل في bac.onec.dz" maxlength="12" onkeydown="if(event.key==='Enter') validateStep1()" />
+        <span class="field-aux-note">نفس رقم التسجيل المستخدم لاستخراج كشف النقاط التوجيهي</span>
+      </div>
+
+      <button class="auth-btn-exec" onclick="validateStep1()">التحقق والمتابعة <span>←</span></button>
+    </div>
+
+    <!-- STEP 2: Profile Customization & Credentials -->
+    <div class="form-step" id="flowStep2">
+      <div class="step-header">
+        <span class="step-indicator">المرحلة 2 من 2</span>
+        <h2 class="step-main-heading">تكوين الملف الأكاديمي</h2>
+        <p class="step-description">اختر المعرّف الرقمي الخاص بك والكلية التي تنتمي إليها للدخول للحرم.</p>
+      </div>
+
+      <div class="error-banner" id="errBannerStep2">يرجى استكمال جميع الحقول ببيانات صحيحة</div>
+
+      <div class="input-field-group">
+        <label class="input-label">الاسم واللقب الحقيقي</label>
+        <input type="text" class="styled-input" id="inpFullName" placeholder="مثال: أمينة بن عمر" onkeydown="if(event.key==='Enter') document.getElementById('selFaculty').focus()" />
+      </div>
+
+      <div class="input-field-group">
+        <label class="input-label">المؤسسة الجامعية والكلية</label>
+        <select class="styled-select" id="selFaculty" onchange="document.getElementById('inpUserHandle').focus()">
+          <option>جامعة العلوم والتكنولوجيا هواري بومدين USTHB · كلية الإعلام الآلي</option>
+          <option>جامعة الجزائر 1 · كلية الحقوق والعلوم السياسية</option>
+          <option>جامعة قسنطينة 3 · كلية الطب والصيدلة</option>
+          <option>جامعة وهران 1 · كلية علوم الطبيعة والحياة</option>
+          <option>المدرسة الوطنية المتعددة التقنيات ENP · هندسة مدنية</option>
         </select>
       </div>
 
-      <div class="field">
-        <label>اسم المستخدم</label>
-        <input type="text" id="usernameInput" placeholder="مثال: mohamed_dz" maxlength="20" onkeydown="if(event.key==='Enter') document.getElementById('passInput').focus()"/>
-        <div class="hint">حروف إنجليزية، أرقام، وشرطة سفلية فقط — بدون مسافات</div>
+      <div class="input-field-group">
+        <label class="input-label">المعرّف الرقمي (Username)</label>
+        <input type="text" class="styled-input" id="inpUserHandle" placeholder="مثال: aminab_dz" maxlength="20" onkeydown="if(event.key==='Enter') document.getElementById('inpSecurePass').focus()" />
+        <span class="field-aux-note">حروف إنجليزية، أرقام، وشرطة سفلية فقط — بدون مسافات</span>
       </div>
 
-      <div class="field">
-        <label>كلمة المرور الجديدة</label>
-        <input type="password" id="passInput" placeholder="6 أحرف أو أرقام على الأقل" onkeydown="if(event.key==='Enter') submitStudentRegistration()"/>
+      <div class="input-field-group">
+        <label class="input-label">كلمة المرور الأمنية</label>
+        <input type="password" class="styled-input" id="inpSecurePass" placeholder="6 أحرف أو أرقام على الأقل" onkeydown="if(event.key==='Enter') executeFinalRegistration()" />
       </div>
 
-      <div class="error-msg" id="err2">يرجى إكمال جميع الحقول بشكل صحيح</div>
-      <button class="btn-primary" onclick="submitStudentRegistration()" id="btnRegSubmit">إرسال الطلب للدخول 🚀</button>
-      <button class="btn-outline" onclick="goBackToStep1()">← العودة للخطوة السابقة</button>
+      <button class="auth-btn-exec" id="btnExecReg" onclick="executeFinalRegistration()">إرسال الطلب للاعتماد 🚀</button>
+      <button class="btn-aux-back" onclick="returnToStep1()">← تعديل بيانات الهوية</button>
     </div>
 
-    <!-- STEP 3: SUCCESS / PENDING APPROVAL -->
-    <div class="step" id="stepSuccess">
-      <div class="success-check"><div class="check-circle" style="color:var(--green); border-color:var(--green);">🎉</div></div>
-      <div class="step-title" style="color:var(--green); text-align:center;">تم تسجيل طلبك بنجاح!</div>
-      <div class="step-desc" style="text-align:center; font-size:0.7rem; color:var(--cream); line-height:1.8;">
-        تم إرسال بياناتك وبطاقة الطالب إلى **لوحة الإدارة** للمراجعة والمطابقة. فور اعتماد حسابك من المشرف، ستتمكن من النشر والمحادثة.
-      </div>
-      
-      <div style="padding:16px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; margin-bottom:24px; text-align:center;">
-        <div style="font-family:'Space Mono'; color:var(--gold); font-size:0.85rem;" id="successBoxUser">@mohamed_dz</div>
-        <div style="font-size:0.75rem; color:var(--cream-dim); margin-top:4px;" id="successBoxFaculty">USTHB</div>
+    <!-- STEP 3: Successful Registration Waiting Screen -->
+    <div class="form-step" id="flowStep3" style="text-align:center;">
+      <div style="font-size:4rem; margin: 0 auto 20px; animation: pulse 1.5s infinite;">🎓🎉</div>
+      <h2 class="step-main-heading" style="color:var(--emerald); margin-bottom:12px;">تم إرسال طلبك إلى الإدارة!</h2>
+      <p class="step-description" style="font-size:1.1rem; color:var(--cream-text); line-height:1.7; max-width:400px; margin: 0 auto 30px;">
+        تم تسجيل ملفك الأكاديمي بنجاح في المنظومة. تذهب الطلبات فورياً إلى **لوحة الإدارة السريّة** ليقوم المشرف باعتمادها بعد التحقق من مطابقة البطاقة.
+      </p>
+
+      <div style="padding:20px; background:var(--glass-card); border:1px solid var(--border-line); border-radius:12px; margin-bottom:32px;">
+        <div style="font-family:'Space Mono', monospace; font-size:1.1rem; color:var(--cyber-gold); font-weight:bold;" id="boxCompleteUser">@user</div>
+        <div style="font-size:0.9rem; color:var(--cream-dim); margin-top:6px;" id="boxCompleteFaculty">USTHB</div>
+        <div style="font-family:'Space Mono', monospace; font-size:0.75rem; color:var(--emerald); margin-top:12px;">0 Posts · 0 Followers · 0 Following</div>
       </div>
 
-      <button class="btn-primary" onclick="enterDirectDemo()">🚀 الدخول المباشر للمنصة (النسخة التوضيحية MVP)</button>
+      <button class="auth-btn-exec" onclick="enterCampusDirectly()">🚀 الدخول المباشر للمنصة (تجاوز الاعتماد MVP)</button>
+    </div>
+
+    <div class="direct-access-bar" id="auxBarEntrance">
+      <span class="direct-link" onclick="enterCampusDirectly()">← هل تملك حساباً معتمداً مسبقاً؟ ادخل مباشرة للحرم</span>
     </div>
 
   </div>
 
-  <!-- Bottom Aux Links -->
-  <div class="quick-tools" style="justify-content: center;">
-    <a href="feed.html" class="quick-link" onclick="localStorage.setItem('approved','true')">← تصفح المنصة مباشرة (كطالب موثق)</a>
-  </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
 <script>
-  // Supabase Configuration from Pasted Text
-  const SUPABASE_URL = "https://bcvcfnefyqheuhawagdr.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjdmNmbmVmeXFoZXVoYXdhZ2RyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNjk4MTAsImV4cCI6MjA5Njg0NTgxMH0.2MwsmSKQ3jOHP2n833hynQp4pngT8LCXDLNmxzrNrPU";
+  function validateStep1() {
+    const carte = document.getElementById("inpCarte").value.trim();
+    const bac = document.getElementById("inpBac").value.trim();
+    const err = document.getElementById("errBannerStep1");
 
-  let supabaseClient = null;
+    if (carte.length < 5 || bac.length < 4) { err.textContent = "يرجى كتابة رقم بطاقة الطالب ورقم البكالوريا بشكل كامل"; err.classList.add("show"); return; }
 
-  // Initial redirect check
-  window.addEventListener("DOMContentLoaded", async () => {
-    if (window.supabase) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-    // If active session exist, redirect to feed
-    if (localStorage.getItem("kulliya_logged_in") === "true" && localStorage.getItem("kulliya_demo_user")) {
-      // window.location.href = "feed.html";
-    }
-  });
-
-  // Toast
-  let toastTimer;
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    err.classList.remove("show"); document.getElementById("flowStep1").classList.remove("active"); document.getElementById("flowStep2").classList.add("active"); document.getElementById("auxBarEntrance").style.display = "none"; setTimeout(() => document.getElementById("inpFullName").focus(), 100);
   }
 
-  // Auto Fill
-  function autoFillDemoStudent() {
-    document.getElementById("carteInput").value = "2026USTHB882";
-    document.getElementById("bacInput").value = "2023991204";
-    showToast("✓ تم ملء رقم البطاقة ورقم البكالوريا");
-    verifyStudentIdentity();
+  function returnToStep1() {
+    document.getElementById("flowStep2").classList.remove("active"); document.getElementById("flowStep1").classList.add("active"); document.getElementById("auxBarEntrance").style.display = "block";
+  }
+
+  function autoFillStudentFlow() {
+    const rId = Math.floor(100 + Math.random() * 900);
+    document.getElementById("inpCarte").value = "2026-USTHB-" + rId; document.getElementById("inpBac").value = "2023991" + rId;
+    window.KulliyaClient.showToast("✓ تم إدخال بطاقة الطالب ورقم البكالوريا", "gold"); validateStep1();
+    
     setTimeout(() => {
-      document.getElementById("nameInput").value = "محمد بن يوسف";
-      document.getElementById("usernameInput").value = "mohamed_dz";
-      document.getElementById("passInput").value = "Kulliya2026!";
+      const fNames = ["أحمد", "ياسين", "فاطمة", "مريم", "إبراهيم", "سلمى", "حمزة", "زينب"]; const lNames = ["منصور", "جابري", "سليماني", "براهيمي", "قاسمي", "عيساوي", "مزيان", "حمدي"];
+      const fN = fNames[Math.floor(Math.random()*fNames.length)]; const lN = lNames[Math.floor(Math.random()*lNames.length)];
+      
+      document.getElementById("inpFullName").value = fN + " " + lN; document.getElementById("inpUserHandle").value = (fN.charAt(0) + lN + rId).toLowerCase(); document.getElementById("inpSecurePass").value = "KulliyaSecure!";
     }, 300);
   }
 
-  // Step 1 -> 2
-  function verifyStudentIdentity() {
-    const carte = document.getElementById("carteInput").value.trim();
-    const bac = document.getElementById("bacInput").value.trim();
-    const err = document.getElementById("err1");
-
-    if (carte.length < 5 || bac.length < 4) {
-      err.textContent = "يرجى إدخال رقم بطاقة الطالب ورقم البكالوريا بشكل صحيح (5 أرقام على الأقل)";
-      err.classList.add("show");
-      return;
-    }
-
-    err.classList.remove("show");
-    document.getElementById("step1").classList.remove("active");
-    document.getElementById("step2").classList.add("active");
-    
-    setTimeout(() => document.getElementById("nameInput").focus(), 100);
-  }
-
-  function goBackToStep1() {
-    document.getElementById("step2").classList.remove("active");
-    document.getElementById("step1").classList.add("active");
-  }
-
-  // Step 2 -> Registration Submit
-  async function submitStudentRegistration() {
-    const name = document.getElementById("nameInput").value.trim();
-    const faculty = document.getElementById("uniSelect").value;
-    const username = document.getElementById("usernameInput").value.trim();
-    const pass = document.getElementById("passInput").value;
-    const bac = document.getElementById("bacInput").value.trim();
-    const carte = document.getElementById("carteInput").value.trim();
-    const err = document.getElementById("err2");
-    const btn = document.getElementById("btnRegSubmit");
-
-    if (!name || !username || pass.length < 6) {
-      err.textContent = "يرجى إكمال جميع الحقول (كلمة المرور 6 أحرف على الأقل)";
-      err.classList.add("show");
-      return;
-    }
-
-    err.classList.remove("show");
-    btn.textContent = "جاري إرسال الطلب إلى Supabase..."; btn.style.opacity = "0.7";
-
-    // Save current student details in localStorage for manual review in admin.html & feed.html
-    const studentObj = {
-      full_name: name,
-      username,
-      bac_number: bac || "2023991204",
-      carte_number: carte || "2026USTHB882",
-      faculty,
-      status: "pending"
+  function autoFillAdminFlow() {
+    const adminUser = {
+      id: "usr-admin-supreme", full_name: "المشرف العام (Admin)", username: "admin_kulliya", faculty: "وزارة التعليم العالي · الإدارة العليا",
+      bio: "المشرف العام والمسؤول عن اعتماد حسابات الطلبة، إدارة الرقابة الأكاديمية ونشر التعاميم السيادية. ⚡🎓",
+      posts_count: 12, followers_count: 4820, following_count: 1, verified: true, role: "admin", avatar_icon: "⚡"
     };
-
-    localStorage.setItem("kulliya_demo_user", JSON.stringify(studentObj));
-    localStorage.setItem("kulliya_new_pending", JSON.stringify(studentObj));
-
-    // Execute actual Supabase request if network/client active
-    if (supabaseClient) {
-      try {
-        // 1. Sign Up in Supabase Auth
-        const authRes = await supabaseClient.auth.signUp({
-          email: username + "@kulliya.dz",
-          password: pass,
-          options: {
-            data: { full_name: name, username, faculty, role: "student" }
-          }
-        });
-        
-        // 2. Insert into pending_students table
-        if (authRes.data && authRes.data.user) {
-          await supabaseClient.from('pending_students').insert([{
-            id: authRes.data.user.id,
-            full_name: name,
-            username,
-            bac_number: bac,
-            student_card_url: "https://kulliya.dz/cards/" + carte + ".jpg",
-            faculty,
-            status: "pending"
-          }]);
-        }
-      } catch (e) {
-        console.log("Supabase execution fallback:", e);
-      }
-    }
-
-    // Move to Step 3 (Success)
-    setTimeout(() => {
-      document.getElementById("step2").classList.remove("active");
-      document.getElementById("successBoxUser").textContent = "المعرّف: @" + username;
-      document.getElementById("successBoxFaculty").textContent = faculty;
-      document.getElementById("stepSuccess").classList.add("active");
-      showToast("✨ تم إرسال طلب توثيقك إلى الإدارة ✓");
-    }, 600);
+    window.KulliyaClient.setCurrentUser(adminUser); localStorage.setItem("kulliya_v2_logged_in", "true"); localStorage.setItem("kulliya_v2_registered_success", "true");
+    
+    window.KulliyaClient.showToast("⚡ تم تسجيل الدخول بصلاحيات المشرف العام ✓", "green"); setTimeout(() => { window.location.href = "vault_admin.html"; }, 500);
   }
 
-  // Direct Enter Demo (For MVP / Quick Testing)
-  function enterDirectDemo() {
-    localStorage.setItem("approved", "true");
-    localStorage.setItem("kulliya_logged_in", "true");
-    document.body.style.opacity = "0";
-    document.body.style.transition = "opacity 0.4s ease";
+  async function executeFinalRegistration() {
+    const full_name = document.getElementById("inpFullName").value.trim(); const faculty = document.getElementById("selFaculty").value; const username = document.getElementById("inpUserHandle").value.trim(); const pass = document.getElementById("inpSecurePass").value; const carte_number = document.getElementById("inpCarte").value.trim(); const bac_number = document.getElementById("inpBac").value.trim();
+    const err = document.getElementById("errBannerStep2"); const btn = document.getElementById("btnExecReg");
+
+    if (!full_name || !username || pass.length < 6) { err.textContent = "يرجى تعبئة كافة البيانات الأمنية"; err.classList.add("show"); return; }
+
+    err.classList.remove("show"); btn.innerHTML = "جاري الحفظ والمزامنة... <span>⏳</span>"; btn.style.opacity = "0.7";
+
+    await window.KulliyaClient.register(full_name, username, pass, faculty, bac_number, carte_number);
+
     setTimeout(() => {
-      window.location.href = "feed.html";
-    }, 400);
+      document.getElementById("flowStep2").classList.remove("active"); document.getElementById("boxCompleteUser").textContent = "@" + username; document.getElementById("boxCompleteFaculty").textContent = faculty; document.getElementById("flowStep3").classList.add("active");
+      window.KulliyaClient.showToast("✨ تم إرسال ملفك إلى الإدارة للاعتماد ✓", "green");
+    }, 800);
+  }
+
+  function enterCampusDirectly() {
+    localStorage.setItem("kulliya_v2_logged_in", "true"); document.body.style.opacity = "0"; document.body.style.transition = "opacity 0.4s ease";
+    setTimeout(() => { window.location.href = "campus.html"; }, 400);
   }
 </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0aaec9b6827ba84',t:'MTc4MTI4OTAwMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0abbd235bf71b23',t:'MTc4MTI5NzU0MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
