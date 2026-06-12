@@ -1,0 +1,29 @@
+{
+  "name": "kulliya-private-university-network",
+  "version": "2.0.0",
+  "description": "Gated University Social Network ('Kulliya') — Express/Socket.io/SQLite real-time server for Render",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "university",
+    "social-network",
+    "twitter-clone",
+    "instagram-clone",
+    "telegram-clone",
+    "sqlite",
+    "socket.io",
+    "render"
+  ],
+  "author": "Kulliya Founder",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.5",
+    "sqlite3": "^5.1.7"
+  }
+}
